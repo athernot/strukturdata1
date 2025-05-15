@@ -1,0 +1,105 @@
+{%extends 'user/layout.html'%}
+{%block isi%}
+<div class="title">KONTAK SUPPORT KAMI</div>
+<div class="content-container">
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+    <!-- Card 1 -->
+    <div style="display: flex; align-items: center; border: 1px solid #000; padding: 15px; box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2); border-radius: 5px;">
+        <img src="https://png.pngtree.com/png-clipart/20230927/original/pngtree-man-in-shirt-smiles-and-gives-thumbs-up-to-show-approval-png-image_13146336.png" alt="John Doe" style="width: 100px; height: 100px; border-radius: 50%; margin-right: 15px;">
+        <div>
+            <h3>John Doe</h3>
+            <p><strong>Nama:</strong> John Doe</p>
+            <p><strong>Tempat, Tanggal Lahir:</strong> Jakarta, 1 Januari 2000</p>
+            <p><strong>Email:</strong> johndoe@example.com</p>
+            <p><strong>No. Telepon:</strong> +62 812 3456 7890</p>
+        </div>
+    </div>
+
+    <!-- Card 2 -->
+    <div style="display: flex; align-items: center; border: 1px solid #000; padding: 15px; box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2); border-radius: 5px;">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSnD5pnITtWGTp1FN6I_twCAt1cVjDMOIf55Q&s" alt="Alice Smith" style="width: 100px; height: 100px; border-radius: 50%; margin-right: 15px;">
+        <div>
+            <h3>Alice Smith</h3>
+            <p><strong>Nama:</strong> Alice Smith</p>
+            <p><strong>Tempat, Tanggal Lahir:</strong> Bandung, 5 Februari 1995</p>
+            <p><strong>Email:</strong> alicesmith@example.com</p>
+            <p><strong>No. Telepon:</strong> +62 812 9876 5432</p>
+        </div>
+    </div>
+
+    <!-- Card 3 -->
+    <div style="display: flex; align-items: center; border: 1px solid #000; padding: 15px; box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2); border-radius: 5px;">
+        <img src="data:image/jpeg;base64,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" alt="Bob Johnson" style="width: 100px; height: 100px; border-radius: 50%; margin-right: 15px;">
+        <div>
+            <h3>Bob Johnson</h3>
+            <p><strong>Nama:</strong> Bob Johnson</p>
+            <p><strong>Tempat, Tanggal Lahir:</strong> Surabaya, 12 Maret 1992</p>
+            <p><strong>Email:</strong> bobjohnson@example.com</p>
+            <p><strong>No. Telepon:</strong> +62 813 1234 5678</p>
+        </div>
+    </div>
+
+    <!-- Card 4 -->
+    <div style="display: flex; align-items: center; border: 1px solid #000; padding: 15px; box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2); border-radius: 5px;">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQW74cj3GnFgdGDpskDGn0eY8ua6breBr3cl5xZb9Z0W4wOxFQyYbLRsy1gDWSO5g0_vls&usqp=CAU" alt="Emma Wilson" style="width: 100px; height: 100px; border-radius: 50%; margin-right: 15px;">
+        <div>
+            <h3>Emma Wilson</h3>
+            <p><strong>Nama:</strong> Emma Wilson</p>
+            <p><strong>Tempat, Tanggal Lahir:</strong> Yogyakarta, 25 April 1993</p>
+            <p><strong>Email:</strong> emmawilson@example.com</p>
+            <p><strong>No. Telepon:</strong> +62 819 2345 6789</p>
+        </div>
+    </div>
+
+    <!-- Card 5 -->
+    <div style="display: flex; align-items: center; border: 1px solid #000; padding: 15px; box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2); border-radius: 5px;">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTrOhsUquplqB6_JwyVmltT7RypUNcTs3pLIQ&s" alt="Charlie Brown" style="width: 100px; height: 100px; border-radius: 50%; margin-right: 15px;">
+        <div>
+            <h3>Charlie Brown</h3>
+            <p><strong>Nama:</strong> Charlie Brown</p>
+            <p><strong>Tempat, Tanggal Lahir:</strong> Medan, 15 Mei 1990</p>
+            <p><strong>Email:</strong> charliebrown@example.com</p>
+            <p><strong>No. Telepon:</strong> +62 817 4567 8901</p>
+        </div>
+    </div>
+
+    <!-- Card 6 -->
+    <div style="display: flex; align-items: center; border: 1px solid #000; padding: 15px; box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2); border-radius: 5px;">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSizh-kPGJWYr6z9Xp00p1iKfAS8gfWRQyA7iXHiATcer3mVWyYG6Sqib646MJrD3KvMxo&usqp=CAU" alt="Diana Prince" style="width: 100px; height: 100px; border-radius: 50%; margin-right: 15px;">
+        <div>
+            <h3>Diana Prince</h3>
+            <p><strong>Nama:</strong> Diana Prince</p>
+            <p><strong>Tempat, Tanggal Lahir:</strong> Bali, 20 Juni 1988</p>
+            <p><strong>Email:</strong> dianaprince@example.com</p>
+            <p><strong>No. Telepon:</strong> +62 816 7890 1234</p>
+        </div>
+    </div>
+</div>
+<style>
+    .content-container {
+        margin-top: 10px; 
+        padding: 0 20px; 
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 70vh; 
+    }
+
+    .title {
+        text-align: center;
+        font-size: 2.25rem; 
+        font-weight: bold;
+        margin-bottom: 10px; 
+    }
+
+    .content-container > div > div {
+        background: linear-gradient(to bottom right, #f8fafc, #e9ecef, #dee2e6); 
+        transition: transform 0.3s, box-shadow 0.3s; 
+    }
+
+    .content-container > div > div:hover {
+        transform: scale(1.02); 
+        box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.25);
+    }
+</style>
+{%endblock%}

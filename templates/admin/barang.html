@@ -1,0 +1,61 @@
+{% extends 'admin/layout.html' %}
+{% block isi %}
+<h2 style="text-align: center; margin-bottom: 20px;">Data Barang</h2>
+<div style="display: flex; justify-content: center; align-items: center; min-height: 100vh;">
+    <div style="width: 95%; max-width: 1200px; background-color: #f9f9f9; border: 1px solid #ddd; border-radius: 8px; padding: 40px; box-shadow: 0 6px 8px rgba(0, 0, 0, 0.1);">
+        <form method="POST" action="/admin/admin-kelola-gudang">
+            <table border="1" cellspacing="0" cellpadding="10" style="width: 100%; border-collapse: collapse; font-size: 18px; margin-top: 0;">
+                <thead>
+                    <tr style="background-color: #f1f1f1;">
+                        <th>ID Barang</th>
+                        <th>Nama Barang</th>
+                        <th>Tanggal</th>
+                        <th>Jumlah</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="text" name="id_barang[]" value="001" style="width: 100%; font-size: 16px;"></td>
+                        <td><input type="text" name="nama_barang[]" value="Sepatu" style="width: 100%; font-size: 16px;"></td>
+                        <td><input type="date" name="tanggal[]" value="2023-10-01" style="width: 100%; font-size: 16px;"></td>
+                        <td><input type="number" name="[]" value="100" style="width: 100%; font-size: 16px;"></td>
+                        <td><button type="button" onclick="deleteRow(this)" style="font-size: 16px;">Delete</button></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="id_barang[]" value="002" style="width: 100%; font-size: 16px;"></td>
+                        <td><input type="text" name="nama_barang[]" value="Sepatu" style="width: 100%; font-size: 16px;"></td>
+                        <td><input type="date" name="tanggal[]" value="2023-10-02" style="width: 100%; font-size: 16px;"></td>
+                        <td><input type="number" name="jumlah[]" value="200" style="width: 100%; font-size: 16px;"></td>
+                        <td><button type="button" onclick="deleteRow(this)" style="font-size: 16px;">Delete</button></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div style="margin-top: 20px; text-align: right;">
+                <button type="button" onclick="addRow()" style="font-size: 16px; padding: 10px 20px;">Add Row</button>
+                <button type="submit" style="font-size: 16px; padding: 10px 20px;">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+<script>
+    function addRow() {
+        const table = document.querySelector('table tbody');
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+            <td><input type="text" name="id_barang[]" style="width: 100%; font-size: 16px;"></td>
+            <td><input type="text" name="nama_barang[]" style="width: 100%; font-size: 16px;"></td>
+            <td><input type="date" name="tanggal[]" style="width: 100%; font-size: 16px;"></td>
+            <td><input type="number" name="jumlah[]" style="width: 100%; font-size: 16px;"></td>
+            <td><button type="button" onclick="deleteRow(this)" style="font-size: 16px;">Delete</button></td>
+        `;
+        table.appendChild(newRow);
+    }
+
+    function deleteRow(button) {
+        const row = button.closest('tr');
+        row.remove();
+    }
+</script>
