@@ -42,6 +42,14 @@ def kelolagudang():
     items = dummy_items 
     return render_template('admin/gudang.html', items=items)
 
+@app.route('/admin/admin-laporan')
+def laporan():
+    """
+    Fungsi ini menampilkan halaman laporan.
+    Saat ini hanya mengembalikan template tanpa data.
+    """
+    return render_template('admin/laporan.html')
+
 @app.route('/admin/gudang/add', methods=['POST'])
 def add_item():
     """

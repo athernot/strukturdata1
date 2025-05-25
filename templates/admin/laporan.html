@@ -1,3 +1,5 @@
+{% extends 'admin/layout.html' %}
+{% block isi %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,13 +19,13 @@
         body {
             margin: 0;
             font-family: 'Poppins', sans-serif;
-            background-color: #f8f9fa; /* Softer background color */
+            background-color: #f8f9fa; 
         }
 
         .sidebar {
             width: 260px;
             height: 100vh;
-            background-color: #212529; /* Darker sidebar */
+            background-color: #212529; 
             color: #fff;
             position: fixed;
             top: 0;
@@ -48,25 +50,25 @@
         }
 
         .sidebar .nav {
-            flex-grow: 1; /* Allow nav to take remaining space */
+            flex-grow: 1;
             list-style: none;
             padding: 10px 0;
             margin: 0;
         }
         
         .nav-item .nav-link {
-            display: flex; /* Use flex for icon alignment */
+            display: flex; 
             align-items: center;
             padding: 12px 20px;
             color: #adb5bd;
             text-decoration: none;
             transition: background-color 0.3s, color 0.3s, border-left-color 0.3s;
-            border-left: 4px solid transparent; /* For active indicator */
+            border-left: 4px solid transparent; 
             font-weight: 500;
         }
 
         .nav-link i.nav-icon {
-            width: 25px; /* Fixed width for icon */
+            width: 25px; 
             margin-right: 15px;
             font-size: 1.1rem;
             text-align: center;
@@ -79,14 +81,13 @@
         }
 
         .nav-link.active {
-            background-color: #0d6efd; /* Bootstrap primary color */
+            background-color: #0d6efd; 
             color: #fff;
-            border-left-color: #ffffff; /* White indicator */
+            border-left-color: #ffffff; 
         }
         
-        /* [IMPROVEMENT] Dropdown Submenu */
         .nav-item .dropdown-toggle::after {
-            margin-left: auto; /* Push arrow to the right */
+            margin-left: auto; 
             transition: transform 0.3s ease;
         }
         .nav-item .dropdown-toggle[aria-expanded="true"]::after {
@@ -97,7 +98,7 @@
             background-color: #1a1d20;
             border: none;
             padding: 0;
-            margin-left: 20px; /* Indent submenu */
+            margin-left: 20px; 
         }
 
         .dropdown-item {
@@ -109,7 +110,6 @@
             color: #fff;
         }
         
-        /* [IMPROVEMENT] Logout/Back button at the bottom */
         .nav-item.mt-auto {
             border-top: 1px solid #343a40;
         }
@@ -129,12 +129,11 @@
             z-index: 1000;
         }
 
-        /* [IMPROVEMENT] Admin Dropdown */
         .admin-info .dropdown-toggle {
             color: #343a40;
         }
         .admin-info .dropdown-toggle::after {
-            display: none; /* Hide default arrow */
+            display: none; 
         }
         .admin-info img {
             width: 35px;
@@ -145,7 +144,7 @@
 
         .main-content {
             margin-left: 260px; 
-            padding: 80px 30px 30px 30px; /* 60px topbar + 20px space */
+            padding: 80px 30px 30px 30px;
             transition: margin-left 0.3s ease;
         }
     </style>
@@ -171,19 +170,34 @@
                 <div class="collapse" id="kelolaSubmenu">
                     <ul class="nav flex-column ms-4">
                         <li class="nav-item">
-                           <a class="nav-link" href="/admin/admin-kelola-barang">Tambahkan Barang</a>
+                            <a class="nav-link" href="/admin/admin-kelola-barang">Tambahkan Barang</a>
                         </li>
                         <li class="nav-item">
-                           <a class="nav-link" href="/admin/admin-kelola-gudang">Kelola Gudang</a>
+                            <a class="nav-link" href="/admin/admin-kelola-gudang">Kelola Gudang</a>
                         </li>
                     </ul>
                 </div>
             </li>
             
             <li class="nav-item">
-                <a class="nav-link" href="/admin/admin-laporan">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#laporanSubmenu" aria-expanded="false" aria-controls="laporanSubmenu">
                     <i class="fas fa-chart-bar nav-icon"></i> Laporan
                 </a>
+                <div class="collapse" id="laporanSubmenu">
+                    <ul class="nav flex-column ms-4">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#kinerjaModal">
+                                <i class="fas fa-chart-line nav-icon"></i> Laporan Kinerja
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#troubleModal">
+                                <i class="fas fa-exclamation-triangle nav-icon"></i> Laporan Trouble
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
             
             <li class="nav-item mt-auto">
                 <a class="nav-link" href="/">
@@ -207,9 +221,70 @@
             </ul>
         </div>
     </div>
-    
-    <div class="main-content">
-        {% block isi %} {% endblock %}
+    <div class="modal fade" id="kinerjaModal" tabindex="-1" aria-labelledby="kinerjaModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="kinerjaModalLabel">Buat Laporan Kinerja</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="kinerjaForm">
+              <div class="mb-3">
+                <label for="kinerja-user" class="form-label">Nama User</label>
+                <input type="text" class="form-control" id="kinerja-user" required>
+              </div>
+              <div class="mb-3">
+                <label for="kinerja-message" class="form-label">Pesan Kinerja</label>
+                <textarea class="form-control" id="kinerja-message" rows="4" required></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            <button type="button" class="btn btn-primary" onclick="submitReport('kinerja')">Kirim Laporan</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="troubleModal" tabindex="-1" aria-labelledby="troubleModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="troubleModalLabel">Buat Laporan Trouble</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="troubleForm">
+              <div class="mb-3">
+                <label for="trouble-location" class="form-label">Lokasi/Departemen</label>
+                <input type="text" class="form-control" id="trouble-location" required>
+              </div>
+              <div class="mb-3">
+                <label for="trouble-message" class="form-label">Detail Masalah</label>
+                <textarea class="form-control" id="trouble-message" rows="4" required></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            <button type="button" class="btn btn-danger" onclick="submitReport('trouble')">Kirim Laporan</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <div id="reportToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+          <strong class="me-auto">Notifikasi</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+          Laporan berhasil dikirim!
+        </div>
+      </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -219,11 +294,10 @@
             const links = document.querySelectorAll('.sidebar .nav-link');
             
             links.forEach(link => {
-                // Check if the link's href is the current path
-                if (link.getAttribute('href') === currentPath) {
+                const linkPath = link.getAttribute('href');
+                if (linkPath && linkPath !== '#' && currentPath.startsWith(linkPath)) {
                     link.classList.add('active');
 
-                    // If the active link is inside a collapsed submenu, expand it
                     const collapse = link.closest('.collapse');
                     if (collapse) {
                         new bootstrap.Collapse(collapse, {
@@ -233,6 +307,24 @@
                 }
             });
         });
+
+        function submitReport(type) {
+            const toastEl = document.getElementById('reportToast');
+            const toast = new bootstrap.Toast(toastEl);
+            
+            if (type === 'kinerja') {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('kinerjaModal'));
+                document.getElementById('kinerjaForm').reset();
+                modal.hide();
+            } else if (type === 'trouble') {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('troubleModal'));
+                document.getElementById('troubleForm').reset();
+                modal.hide();
+            }
+            
+            toast.show();
+        }
     </script>
 </body>
 </html>
+{% endblock %}
