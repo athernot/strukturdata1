@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Struktur Data Persisten</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container { margin-top: 50px; }
+        .card { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-5">Struktur Data Persisten</h1>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Array</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="array-list">
+                            <p>Loading arrays...</p>
+                        </div>
+                        <hr>
+                        <h5>Create New Array</h5>
+                        <form id="array-form">
+                            <div class="mb-3">
+                                <label for="array-name" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="array-name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="array-size" class="form-label">Size</label>
+                                <input type="number" class="form-control" id="array-size" min="1" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Create</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Linked List</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="list-list">
+                            <p>Loading linked lists...</p>
+                        </div>
+                        <hr>
+                        <h5>Create New Linked List</h5>
+                        <form id="list-form">
+                            <div class="mb-3">
+                                <label for="list-name" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="list-name" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Create</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Queue</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="queue-list">
+                            <p>Loading queues...</p>
+                        </div>
+                        <hr>
+                        <h5>Create New Queue</h5>
+                        <form id="queue-form">
+                            <div class="mb-3">
+                                <label for="queue-name" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="queue-name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="queue-capacity" class="form-label">Capacity</label>
+                                <input type="number" class="form-control" id="queue-capacity" min="1" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Create</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Stack</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="stack-list">
+                            <p>Loading stacks...</p>
+                        </div>
+                        <hr>
+                        <h5>Create New Stack</h5>
+                        <form id="stack-form">
+                            <div class="mb-3">
+                                <label for="stack-name" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="stack-name" required>
+                                                       </div>
+                            <div class="mb-3">
+                                <label for="stack-capacity" class="form-label">Capacity</label>
+                                <input type="number" class="form-control" id="stack-capacity" min="1" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Create</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal untuk detail struktur data -->
+    <div class="modal fade" id="dataModal" tabindex="-1" aria-labelledby="dataModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="dataModalLabel">Data Structure Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="modal-content">
+                    <!-- Konten akan diisi oleh JavaScript -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Fungsi utilitas
+        function createCard(item, type) {
+            return `
+                <div class="card mb-2">
+                    <div class="card-body">
+                        <h5 class="card-title">${item.name}</h5>
+                        <p class="card-text">ID: ${item.id}</p>
+                        <button class="btn btn-info btn-sm view-btn" data-type="${type}" data-id="${item.id}">View</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Load Arrays
+        function loadArrays() {
+            fetch('/arrays')
+                .then(response => response.json())
+                .then(arrays => {
+                    const arrayList = document.getElementById('array-list');
+                    if (arrays.length === 0) {
+                        arrayList.innerHTML = '<p>No arrays found.</p>';
+                        return;
+                    }
+                    
+                    let html = '';
+                    arrays.forEach(array => {
+                        html += createCard(array, 'array');
+                    });
+                    arrayList.innerHTML = html;
+                    
+                    // Add event listeners to view buttons
+                    document.querySelectorAll('.view-btn[data-type="array"]').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const id = this.getAttribute('data-id');
+                            viewArray(id);
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading arrays:', error);
+                    document.getElementById('array-list').innerHTML = '<p class="text-danger">Error loading arrays.</p>';
+                });
+        }
+
+        // View Array Details
+        function viewArray(id) {
+            fetch(`/arrays/${id}`)
+                .then(response => response.json())
+                .then(array => {
+                    const modal = new bootstrap.Modal(document.getElementById('dataModal'));
+                    const modalTitle = document.getElementById('dataModalLabel');
+                    const modalContent = document.getElementById('modal-content');
+                    
+                    modalTitle.textContent = `Array: ${array.name}`;
+                    
+                    let html = `
+                        <div class="mb-3">
+                            <h6>Size: ${array.size}</h6>
+                        </div>
+                        <div class="mb-3">
+                            <h6>Elements:</h6>
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Index</th>
+                                        <th>Value</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+                    
+                    // Create a map of position to value for easy lookup
+                    const elementsMap = {};
+                    array.elements.forEach(elem => {
+                        elementsMap[elem.position] = elem.value;
+                    });
+                    
+                    // Generate rows for all positions
+                    for (let i = 0; i < array.size; i++) {
+                        const value = elementsMap[i] !== undefined ? elementsMap[i] : 'null';
+                        html += `
+                            <tr>
+                                <td>${i}</td>
+                                <td class="value-cell-${i}">${value}</td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm set-value-btn" data-array-id="${array.id}" data-index="${i}">Set</button>
+                                    <button class="btn btn-danger btn-sm delete-btn" data-array-id="${array.id}" data-index="${i}">Delete</button>
+                                </td>
+                            </tr>
+                        `;
+                    }
+                    
+                    html += `
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mb-3">
+                            <h6>Search:</h6>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="search-value" placeholder="Value to search">
+                                <button class="btn btn-primary search-btn" data-array-id="${array.id}">Search</button>
+                            </div>
+                            <div id="search-results" class="mt-2"></div>
+                        </div>
+                    `;
+                    
+                    modalContent.innerHTML = html;
+                    
+                    // Add event listeners for set value buttons
+                    document.querySelectorAll('.set-value-btn').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const arrayId = this.getAttribute('data-array-id');
+                            const index = this.getAttribute('data-index');
+                            const value = prompt('Enter new value:');
+                            
+                            if (value !== null) {
+                                setArrayValue(arrayId, index, parseInt(value));
+                            }
+                        });
+                    });
+                    
+                    // Add event listeners for delete buttons
+                    document.querySelectorAll('.delete-btn').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const arrayId = this.getAttribute('data-array-id');
+                            const index = this.getAttribute('data-index');
+                            
+                            if (confirm('Are you sure you want to delete this element?')) {
+                                deleteArrayElement(arrayId, index);
+                            }
+                        });
+                    });
+                    
+                    // Add event listener for search button
+                    document.querySelector('.search-btn').addEventListener('click', function() {
+                        const arrayId = this.getAttribute('data-array-id');
+                        const value = document.getElementById('search-value').value;
+                        
+                        if (value) {
+                            searchArray(arrayId, parseInt(value));
+                        }
+                    });
+                    
+                    modal.show();
+                })
+                .catch(error => {
+                    console.error('Error viewing array:', error);
+                    alert('Error loading array details.');
+                });
+        }
+
+        // Set Array Value
+        function setArrayValue(arrayId, index, value) {
+            fetch(`/arrays/${arrayId}/elements`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ index, value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.querySelector(`.value-cell-${index}`).textContent = value;
+                } else {
+                    alert(data.message || 'Error setting value.');
+                }
+            })
+            .catch(error => {
+                console.error('Error setting array value:', error);
+                alert('Error setting value.');
+            });
+        }
+
+        // Delete Array Element
+        function deleteArrayElement(arrayId, index) {
+            fetch(`/arrays/${arrayId}/elements/${index}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Refresh the array view
+                    viewArray(arrayId);
+                } else {
+                    alert(data.message || 'Error deleting element.');
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting array element:', error);
+                alert('Error deleting element.');
+            });
+        }
+
+        // Search Array
+        function searchArray(arrayId, value) {
+            fetch(`/arrays/${arrayId}/search?value=${value}`)
+                .then(response => response.json())
+                .then(data => {
+                    const resultsDiv = document.getElementById('search-results');
+                    
+                    if (data.success) {
+                        if (data.positions.length > 0) {
+                            resultsDiv.innerHTML = `
+                                <div class="alert alert-success">
+                                    Value ${data.value} found at positions: ${data.positions.join(', ')}
+                                </div>
+                            `;
+                        } else {
+                            resultsDiv.innerHTML = `
+                                <div class="alert alert-warning">
+                                    Value ${data.value} not found in the array.
+                                </div>
+                            `;
+                        }
+                    } else {
+                        resultsDiv.innerHTML = `
+                            <div class="alert alert-danger">
+                                ${data.message || 'Error searching array.'}
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error searching array:', error);
+                    document.getElementById('search-results').innerHTML = `
+                        <div class="alert alert-danger">
+                            Error searching array.
+                        </div>
+                    `;
+                });
+        }
+
+        // Load Linked Lists
+        function loadLinkedLists() {
+            fetch('/linked-lists')
+                .then(response => response.json())
+                .then(lists => {
+                    const listList = document.getElementById('list-list');
+                    if (lists.length === 0) {
+                        listList.innerHTML = '<p>No linked lists found.</p>';
+                        return;
+                    }
+                    
+                    let html = '';
+                    lists.forEach(list => {
+                        html += createCard(list, 'list');
+                    });
+                    listList.innerHTML = html;
+                    
+                    // Add event listeners to view buttons
+                    document.querySelectorAll('.view-btn[data-type="list"]').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const id = this.getAttribute('data-id');
+                            viewLinkedList(id);
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading linked lists:', error);
+                    document.getElementById('list-list').innerHTML = '<p class="text-danger">Error loading linked lists.</p>';
+                });
+        }
+
+        // View Linked List Details
+        function viewLinkedList(id) {
+            fetch(`/linked-lists/${id}`)
+                .then(response => response.json())
+                .then(list => {
+                    const modal = new bootstrap.Modal(document.getElementById('dataModal'));
+                    const modalTitle = document.getElementById('dataModalLabel');
+                    const modalContent = document.getElementById('modal-content');
+                    
+                    modalTitle.textContent = `Linked List: ${list.name}`;
+                    
+                    let html = `
+                        <div class="mb-3">
+                            <h6>Nodes:</h6>
+                            <div class="linked-list-visualization">
+                    `;
+                    
+                    if (list.nodes.length === 0) {
+                        html += '<p>Empty linked list</p>';
+                    } else {
+                        list.nodes.forEach((node, index) => {
+                            html += `
+                                <div class="node-box">
+                                    <div class="node-value">${node.value}</div>
+                                    ${index < list.nodes.length - 1 ? '<div class="node-arrow">→</div>' : ''}
+                                </div>
+                            `;
+                        });
+                    }
+                    
+                    html += `
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <h6>Add Node:</h6>
+                                <div class="input-group mb-2">
+                                    <input type="number" class="form-control" id="append-value" placeholder="Value">
+                                    <button class="btn btn-primary append-btn" data-list-id="${list.id}">Append</button>
+                                </div>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="prepend-value" placeholder="Value">
+                                    <button class="btn btn-primary prepend-btn" data-list-id="${list.id}">Prepend</button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Delete Node:</h6>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="delete-value" placeholder="Value">
+                                    <button class="btn btn-danger delete-node-btn" data-list-id="${list.id}">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <h6>Search:</h6>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="search-list-value" placeholder="Value to search">
+                                <button class="btn btn-primary search-list-btn" data-list-id="${list.id}">Search</button>
+                            </div>
+                            <div id="list-search-results" class="mt-2"></div>
+                        </div>
+                    `;
+                    
+                    modalContent.innerHTML = html;
+                    
+                    // Add CSS for linked list visualization
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        .linked-list-visualization {
+                            display: flex;
+                            align-items: center;
+                            overflow-x: auto;
+                            padding: 10px 0;
+                        }
+                        .node-box {
+                            display: flex;
+                            align-items: center;
+                        }
+                        .node-value {
+                            border: 2px solid #007bff;
+                            border-radius: 5px;
+                            padding: 10px 15px;
+                            margin: 5px;
+                            background-color: #f8f9fa;
+                        }
+                        .node-arrow {
+                            font-size: 20px;
+                            margin: 0 5px;
+                            color: #6c757d;
+                        }
+                    `;
+                    document.head.appendChild(style);
+                    
+                    // Add event listeners
+                    document.querySelector('.append-btn').addEventListener('click', function() {
+                        const listId = this.getAttribute('data-list-id');
+                        const value = document.getElementById('append-value').value;
+                        
+                        if (value) {
+                            appendToList(listId, parseInt(value));
+                        }
+                    });
+                    
+                                        document.querySelector('.prepend-btn').addEventListener('click', function() {
+                        const listId = this.getAttribute('data-list-id');
+                        const value = document.getElementById('prepend-value').value;
+                        
+                        if (value) {
+                            prependToList(listId, parseInt(value));
+                        }
+                    });
+                    
+                    document.querySelector('.delete-node-btn').addEventListener('click', function() {
+                        const listId = this.getAttribute('data-list-id');
+                        const value = document.getElementById('delete-value').value;
+                        
+                        if (value) {
+                            deleteFromList(listId, parseInt(value));
+                        }
+                    });
+                    
+                    document.querySelector('.search-list-btn').addEventListener('click', function() {
+                        const listId = this.getAttribute('data-list-id');
+                        const value = document.getElementById('search-list-value').value;
+                        
+                        if (value) {
+                            searchList(listId, parseInt(value));
+                        }
+                    });
+                    
+                    modal.show();
+                })
+                .catch(error => {
+                    console.error('Error viewing linked list:', error);
+                    alert('Error loading linked list details.');
+                });
+        }
+
+        // Append to Linked List
+        function appendToList(listId, value) {
+            fetch(`/linked-lists/${listId}/append`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Refresh the linked list view
+                    viewLinkedList(listId);
+                } else {
+                    alert(data.message || 'Error appending to list.');
+                }
+            })
+            .catch(error => {
+                console.error('Error appending to list:', error);
+                alert('Error appending to list.');
+            });
+        }
+
+        // Prepend to Linked List
+        function prependToList(listId, value) {
+            fetch(`/linked-lists/${listId}/prepend`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Refresh the linked list view
+                    viewLinkedList(listId);
+                } else {
+                    alert(data.message || 'Error prepending to list.');
+                }
+            })
+            .catch(error => {
+                console.error('Error prepending to list:', error);
+                alert('Error prepending to list.');
+            });
+        }
+
+        // Delete from Linked List
+        function deleteFromList(listId, value) {
+            fetch(`/linked-lists/${listId}/delete`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Refresh the linked list view
+                    viewLinkedList(listId);
+                } else {
+                    alert(data.message || 'Error deleting from list.');
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting from list:', error);
+                alert('Error deleting from list.');
+            });
+        }
+
+        // Search Linked List
+        function searchList(listId, value) {
+            fetch(`/linked-lists/${listId}/search?value=${value}`)
+                .then(response => response.json())
+                .then(data => {
+                    const resultsDiv = document.getElementById('list-search-results');
+                    
+                    if (data.success) {
+                        resultsDiv.innerHTML = `
+                            <div class="alert alert-success">
+                                Value ${data.value} found in the list.
+                            </div>
+                        `;
+                    } else {
+                        resultsDiv.innerHTML = `
+                            <div class="alert alert-warning">
+                                ${data.message || 'Value not found in the list.'}
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error searching list:', error);
+                    document.getElementById('list-search-results').innerHTML = `
+                        <div class="alert alert-danger">
+                            Error searching list.
+                        </div>
+                    `;
+                });
+        }
+
+        // Load Queues
+        function loadQueues() {
+            fetch('/queues')
+                .then(response => response.json())
+                .then(queues => {
+                    const queueList = document.getElementById('queue-list');
+                    if (queues.length === 0) {
+                        queueList.innerHTML = '<p>No queues found.</p>';
+                        return;
+                    }
+                    
+                    let html = '';
+                    queues.forEach(queue => {
+                        html += createCard(queue, 'queue');
+                    });
+                    queueList.innerHTML = html;
+                    
+                    // Add event listeners to view buttons
+                    document.querySelectorAll('.view-btn[data-type="queue"]').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const id = this.getAttribute('data-id');
+                            viewQueue(id);
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading queues:', error);
+                    document.getElementById('queue-list').innerHTML = '<p class="text-danger">Error loading queues.</p>';
+                });
+        }
+
+        // View Queue Details
+        function viewQueue(id) {
+            fetch(`/queues/${id}`)
+                .then(response => response.json())
+                .then(queue => {
+                    const modal = new bootstrap.Modal(document.getElementById('dataModal'));
+                    const modalTitle = document.getElementById('dataModalLabel');
+                    const modalContent = document.getElementById('modal-content');
+                    
+                    modalTitle.textContent = `Queue: ${queue.name}`;
+                    
+                    let html = `
+                        <div class="mb-3">
+                            <h6>Capacity: ${queue.capacity}</h6>
+                            <h6>Size: ${queue.size}</h6>
+                            <h6>Front: ${queue.front}</h6>
+                            <h6>Rear: ${queue.rear}</h6>
+                        </div>
+                        <div class="mb-3">
+                            <h6>Elements:</h6>
+                            <div class="queue-visualization">
+                    `;
+                    
+                    if (queue.elements.length === 0) {
+                        html += '<p>Empty queue</p>';
+                    } else {
+                        queue.elements.forEach((elem, index) => {
+                            html += `
+                                <div class="queue-element ${index === 0 ? 'front' : ''} ${index === queue.elements.length - 1 ? 'rear' : ''}">
+                                    ${elem.value}
+                                </div>
+                            `;
+                        });
+                    }
+                    
+                    html += `
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <h6>Enqueue:</h6>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="enqueue-value" placeholder="Value">
+                                    <button class="btn btn-primary enqueue-btn" data-queue-id="${queue.id}">Enqueue</button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Dequeue:</h6>
+                                <button class="btn btn-danger dequeue-btn" data-queue-id="${queue.id}">Dequeue</button>
+                                <div id="dequeue-result" class="mt-2"></div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    modalContent.innerHTML = html;
+                    
+                    // Add CSS for queue visualization
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        .queue-visualization {
+                            display: flex;
+                            align-items: center;
+                            overflow-x: auto;
+                            padding: 10px 0;
+                        }
+                        .queue-element {
+                            border: 2px solid #28a745;
+                            border-radius: 5px;
+                            padding: 10px 15px;
+                            margin: 5px;
+                            background-color: #f8f9fa;
+                            position: relative;
+                        }
+                        .queue-element.front:before {
+                            content: 'Front';
+                            position: absolute;
+                            top: -20px;
+                            left: 0;
+                            font-size: 12px;
+                            color: #28a745;
+                        }
+                        .queue-element.rear:after {
+                            content: 'Rear';
+                            position: absolute;
+                            bottom: -20px;
+                            right: 0;
+                            font-size: 12px;
+                            color: #dc3545;
+                        }
+                    `;
+                    document.head.appendChild(style);
+                    
+                    // Add event listeners
+                    document.querySelector('.enqueue-btn').addEventListener('click', function() {
+                        const queueId = this.getAttribute('data-queue-id');
+                        const value = document.getElementById('enqueue-value').value;
+                        
+                        if (value) {
+                            enqueue(queueId, parseInt(value));
+                        }
+                    });
+                    
+                    document.querySelector('.dequeue-btn').addEventListener('click', function() {
+                        const queueId = this.getAttribute('data-queue-id');
+                        dequeue(queueId);
+                    });
+                    
+                    modal.show();
+                })
+                .catch(error => {
+                    console.error('Error viewing queue:', error);
+                    alert('Error loading queue details.');
+                });
+        }
+
+        // Enqueue
+        function enqueue(queueId, value) {
+            fetch(`/queues/${queueId}/enqueue`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Refresh the queue view
+                    viewQueue(queueId);
+                } else {
+                    alert(data.message || 'Error enqueuing value.');
+                }
+            })
+            .catch(error => {
+                console.error('Error enqueuing:', error);
+                alert('Error enqueuing value.');
+            });
+        }
+
+        // Dequeue
+        function dequeue(queueId) {
+            fetch(`/queues/${queueId}/dequeue`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('dequeue-result').innerHTML = `
+                        <div class="alert alert-success">
+                            Dequeued value: ${data.value}
+                        </div>
+                    `;
+                    // Refresh the queue view
+                    viewQueue(queueId);
+                } else {
+                    document.getElementById('dequeue-result').innerHTML = `
+                        <div class="alert alert-warning">
+                            ${data.message || 'Error dequeuing value.'}
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error dequeuing:', error);
+                document.getElementById('dequeue-result').innerHTML = `
+                    <div class="alert alert-danger">
+                        Error dequeuing value.
+                    </div>
+                `;
+            });
+        }
+
+        // Load Stacks
+        function loadStacks() {
+            fetch('/stacks')
+                .then(response => response.json())
+                .then(stacks => {
+                    const stackList = document.getElementById('stack-list');
+                    if (stacks.length === 0) {
+                        stackList.innerHTML = '<p>No stacks found.</p>';
+                        return;
+                    }
+                    
+                    let html = '';
+                    stacks.forEach(stack => {
+                        html += createCard(stack, 'stack');
+                    });
+                    stackList.innerHTML = html;
+                    
+                    // Add event listeners to view buttons
+                    document.querySelectorAll('.view-btn[data-type="stack"]').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const id = this.getAttribute('data-id');
+                            viewStack(id);
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading stacks:', error);
+                    document.getElementById('stack-list').innerHTML = '<p class="text-danger">Error loading stacks.</p>';
+                });
+        }
+
+        // View Stack Details
+        function viewStack(id) {
+            fetch(`/stacks/${id}`)
+                .then(response => response.json())
+                .then(stack => {
+                    const modal = new bootstrap.Modal(document.getElementById('dataModal'));
+                    const modalTitle = document.getElementById('dataModalLabel');
+                    const modalContent = document.getElementById('modal-content');
+                    
+                    modalTitle.textContent = `Stack: ${stack.name}`;
+                    
+                    let html = `
+                        <div class="mb-3">
+                            <h6>Capacity: ${stack.capacity}</h6>
+                            <h6>Top: ${stack.top}</h6>
+                        </div>
+                        <div class="mb-3">
+                            <h6>Elements:</h6>
+                            <div class="stack-visualization">
+                    `;
+                    
+                    if (stack.elements.length === 0) {
+                        html += '<p>Empty stack</p>';
+                    } else {
+                        // Display stack elements in reverse order (top to bottom)
+                        for (let i = 0; i < stack.elements.length; i++) {
+                            const elem = stack.elements[i];
+                            html += `
+                                <div class="stack-element ${i === 0 ? 'top' : ''}">
+                                    ${elem.value}
+                                </div>
+                            `;
+                        }
+                    }
+                    
+                    html += `
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <h6>Push:</h6>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="push-value" placeholder="Value">
+                                    <button class="btn btn-primary push-btn" data-stack-id="${stack.id}">Push</button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Pop:</h6>
+                                <button class="btn btn-danger pop-btn" data-stack-id="${stack.id}">Pop</button>
+                                <div id="pop-result" class="mt-2"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <h6>Peek:</h6>
+                            <button class="btn btn-info peek-btn" data-stack-id="${stack.id}">Peek</button>
+                            <div id="peek-result" class="mt-2"></div>
+                        </div>
+                    `;
+                    
+                    modalContent.innerHTML = html;
+                    
+                    // Add CSS for stack visualization
+                                        const style = document.createElement('style');
+                    style.textContent = `
+                        .stack-visualization {
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            padding: 10px 0;
+                        }
+                        .stack-element {
+                            border: 2px solid #dc3545;
+                            border-radius: 5px;
+                            padding: 10px 15px;
+                            margin: 5px;
+                            background-color: #f8f9fa;
+                        }
+                        .stack-element.top:before {
+                            content: 'Top';
+                            position: absolute;
+                            top: -20px;
+                            font-size: 12px;
+                            color: #dc3545;
+                        }
+                    `;
+                    document.head.appendChild(style);
+                    
+                    // Add event listeners
+                    document.querySelector('.push-btn').addEventListener('click', function() {
+                        const stackId = this.getAttribute('data-stack-id');
+                        const value = document.getElementById('push-value').value;
+                        
+                        if (value) {
+                            push(stackId, parseInt(value));
+                        }
+                    });
+                    
+                    document.querySelector('.pop-btn').addEventListener('click', function() {
+                        const stackId = this.getAttribute('data-stack-id');
+                        pop(stackId);
+                    });
+                    
+                    document.querySelector('.peek-btn').addEventListener('click', function() {
+                        const stackId = this.getAttribute('data-stack-id');
+                        peek(stackId);
+                    });
+                    
+                    modal.show();
+                })
+                .catch(error => {
+                    console.error('Error viewing stack:', error);
+                    alert('Error loading stack details.');
+                });
+        }
+
+        // Push to Stack
+        function push(stackId, value) {
+            fetch(`/stacks/${stackId}/push`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Refresh the stack view
+                    viewStack(stackId);
+                } else {
+                    alert(data.message || 'Error pushing value.');
+                }
+            })
+            .catch(error => {
+                console.error('Error pushing to stack:', error);
+                alert('Error pushing value.');
+            });
+        }
+
+        // Pop from Stack
+        function pop(stackId) {
+            fetch(`/stacks/${stackId}/pop`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('pop-result').innerHTML = `
+                        <div class="alert alert-success">
+                            Popped value: ${data.value}
+                        </div>
+                    `;
+                    // Refresh the stack view
+                    viewStack(stackId);
+                } else {
+                    document.getElementById('pop-result').innerHTML = `
+                        <div class="alert alert-warning">
+                            ${data.message || 'Error popping value.'}
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error popping from stack:', error);
+                document.getElementById('pop-result').innerHTML = `
+                    <div class="alert alert-danger">
+                        Error popping value.
+                    </div>
+                `;
+            });
+        }
+
+        // Peek at Stack
+        function peek(stackId) {
+            fetch(`/stacks/${stackId}/peek`)
+                .then(response => response.json())
+                .then(data => {
+                    const resultDiv = document.getElementById('peek-result');
+                    if (data.success) {
+                        resultDiv.innerHTML = `
+                            <div class="alert alert-info">
+                                Top value: ${data.value}
+                            </div>
+                        `;
+                    } else {
+                        resultDiv.innerHTML = `
+                            <div class="alert alert-warning">
+                                ${data.message || 'Stack is empty.'}
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error peeking at stack:', error);
+                    document.getElementById('peek-result').innerHTML = `
+                        <div class="alert alert-danger">
+                            Error peeking at stack.
+                        </div>
+                    `;
+                });
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            loadArrays();
+            loadLinkedLists();
+            loadQueues();
+            loadStacks();
+        });
+    </script>
+</body>
+</html>
