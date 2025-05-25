@@ -1,61 +1,134 @@
 {% extends 'admin/layout.html' %}
 {% block isi %}
-<h2 style="text-align: center; margin-bottom: 20px;">Data Barang</h2>
-<div style="display: flex; justify-content: center; align-items: center; min-height: 100vh;">
-    <div style="width: 95%; max-width: 1200px; background-color: #f9f9f9; border: 1px solid #ddd; border-radius: 8px; padding: 40px; box-shadow: 0 6px 8px rgba(0, 0, 0, 0.1);">
-        <form method="POST" action="/admin/admin-kelola-gudang">
-            <table border="1" cellspacing="0" cellpadding="10" style="width: 100%; border-collapse: collapse; font-size: 18px; margin-top: 0;">
-                <thead>
-                    <tr style="background-color: #f1f1f1;">
-                        <th>ID Barang</th>
-                        <th>Nama Barang</th>
-                        <th>Tanggal</th>
-                        <th>Jumlah</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><input type="text" name="id_barang[]" value="001" style="width: 100%; font-size: 16px;"></td>
-                        <td><input type="text" name="nama_barang[]" value="Sepatu" style="width: 100%; font-size: 16px;"></td>
-                        <td><input type="date" name="tanggal[]" value="2023-10-01" style="width: 100%; font-size: 16px;"></td>
-                        <td><input type="number" name="[]" value="100" style="width: 100%; font-size: 16px;"></td>
-                        <td><button type="button" onclick="deleteRow(this)" style="font-size: 16px;">Delete</button></td>
-                    </tr>
-                    <tr>
-                        <td><input type="text" name="id_barang[]" value="002" style="width: 100%; font-size: 16px;"></td>
-                        <td><input type="text" name="nama_barang[]" value="Sepatu" style="width: 100%; font-size: 16px;"></td>
-                        <td><input type="date" name="tanggal[]" value="2023-10-02" style="width: 100%; font-size: 16px;"></td>
-                        <td><input type="number" name="jumlah[]" value="200" style="width: 100%; font-size: 16px;"></td>
-                        <td><button type="button" onclick="deleteRow(this)" style="font-size: 16px;">Delete</button></td>
-                    </tr>
-                </tbody>
-            </table>
-            <div style="margin-top: 20px; text-align: right;">
-                <button type="button" onclick="addRow()" style="font-size: 16px; padding: 10px 20px;">Add Row</button>
-                <button type="submit" style="font-size: 16px; padding: 10px 20px;">Save</button>
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Kelola Gudang</h1>
+    <p class="mb-4">Kelola data barang masuk dan keluar di gudang Anda.</p>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+            <h5 class="mb-0 fw-bold text-secondary">Data Barang Gudang</h5>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#itemModal" onclick="prepareAddForm()">
+                <i class="fas fa-plus me-2"></i>Tambah Data
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">ID Barang</th>
+                            <th scope="col">Nama Barang</th>
+                            <th scope="col">Tanggal</th>
+                            <th scope="col">Jumlah</th>
+                            <th scope="col" class="text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">1</th>
+                            <td>BRG-001</td>
+                            <td>Sepatu Lari Adidas</td>
+                            <td>2024-05-20</td>
+                            <td>100</td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-info text-white" data-bs-toggle="modal" data-bs-target="#itemModal" onclick="prepareEditForm('1', 'BRG-001', 'Sepatu Lari Adidas', '2024-05-20', '100')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger ms-1">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>BRG-002</td>
+                            <td>Kaos Polos Katun</td>
+                            <td>2024-05-22</td>
+                            <td>250</td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-info text-white" data-bs-toggle="modal" data-bs-target="#itemModal" onclick="prepareEditForm('2', 'BRG-002', 'Kaos Polos Katun', '2024-05-22', '250')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger ms-1">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        </tbody>
+                </table>
             </div>
-        </form>
+        </div>
     </div>
 </div>
-{% endblock %}
+
+<div class="modal fade" id="itemModal" tabindex="-1" aria-labelledby="itemModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="itemModalLabel">Tambah Data Barang</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="itemForm" method="POST" action="">
+                <div class="modal-body">
+                    <input type="hidden" id="itemId" name="id">
+
+                    <div class="mb-3">
+                        <label for="id_barang" class="form-label">ID Barang</label>
+                        <input type="text" class="form-control" id="id_barang" name="id_barang" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="nama_barang" class="form-label">Nama Barang</label>
+                        <input type="text" class="form-control" id="nama_barang" name="nama_barang" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tanggal" class="form-label">Tanggal</label>
+                        <input type="date" class="form-control" id="tanggal" name="tanggal" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="jumlah" class="form-label">Jumlah</label>
+                        <input type="number" class="form-control" id="jumlah" name="jumlah" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary" id="saveButton">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <script>
-    function addRow() {
-        const table = document.querySelector('table tbody');
-        const newRow = document.createElement('tr');
-        newRow.innerHTML = `
-            <td><input type="text" name="id_barang[]" style="width: 100%; font-size: 16px;"></td>
-            <td><input type="text" name="nama_barang[]" style="width: 100%; font-size: 16px;"></td>
-            <td><input type="date" name="tanggal[]" style="width: 100%; font-size: 16px;"></td>
-            <td><input type="number" name="jumlah[]" style="width: 100%; font-size: 16px;"></td>
-            <td><button type="button" onclick="deleteRow(this)" style="font-size: 16px;">Delete</button></td>
-        `;
-        table.appendChild(newRow);
+    const itemModal = document.getElementById('itemModal');
+    const modalTitle = document.getElementById('itemModalLabel');
+    const itemForm = document.getElementById('itemForm');
+    const saveButton = document.getElementById('saveButton');
+
+    // Fungsi untuk menyiapkan modal untuk MENAMBAH data
+    function prepareAddForm() {
+        itemForm.reset(); // Kosongkan form
+        modalTitle.textContent = 'Tambah Data Barang';
+        saveButton.textContent = 'Simpan';
+        // [DATABASE PREPARATION] Arahkan form ke endpoint 'tambah data'
+        itemForm.action = '/admin/gudang/tambah'; 
+        document.getElementById('itemId').value = '';
     }
 
-    function deleteRow(button) {
-        const row = button.closest('tr');
-        row.remove();
+    // Fungsi untuk menyiapkan modal untuk MENGEDIT data
+    function prepareEditForm(id, id_barang, nama_barang, tanggal, jumlah) {
+        itemForm.reset();
+        modalTitle.textContent = 'Edit Data Barang';
+        saveButton.textContent = 'Simpan Perubahan';
+        // [DATABASE PREPARATION] Arahkan form ke endpoint 'edit data' dengan ID
+        itemForm.action = `/admin/gudang/edit/${id}`;
+
+        // Isi form dengan data yang ada
+        document.getElementById('itemId').value = id;
+        document.getElementById('id_barang').value = id_barang;
+        document.getElementById('nama_barang').value = nama_barang;
+        document.getElementById('tanggal').value = tanggal;
+        document.getElementById('jumlah').value = jumlah;
     }
 </script>
+{% endblock %}

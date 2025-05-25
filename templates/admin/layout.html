@@ -3,158 +3,236 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Layout</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> 
+    <title>Modern Admin Layout</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     <style>
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa; /* Softer background color */
         }
-        nav {
-            margin: 0;
-            padding: 0;
-        }
+
         .sidebar {
-            width: 250px;
+            width: 260px;
             height: 100vh;
-            background-color: #343a40;
+            background-color: #212529; /* Darker sidebar */
             color: #fff;
             position: fixed;
             top: 0;
             left: 0;
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
+
         .sidebar-header {
             padding: 20px;
             text-align: center;
-            background-color: #212529;
-            border-bottom: 1px solid #495057;
+            background-color: #1a1d20;
+            border-bottom: 1px solid #343a40;
         }
+
         .sidebar-header h2 {
             margin: 0;
-            font-size: 1.5rem;
+            font-size: 1.7rem;
+            font-weight: 600;
         }
-        .nav {
+
+        .sidebar .nav {
+            flex-grow: 1; /* Allow nav to take remaining space */
             list-style: none;
-            padding: 0;
+            padding: 10px 0;
             margin: 0;
         }
-        .nav-item {
-            border-bottom: 1px solid #495057;
-        }
-        .nav-link {
-            display: block;
-            padding: 15px 20px;
+        
+        .nav-item .nav-link {
+            display: flex; /* Use flex for icon alignment */
+            align-items: center;
+            padding: 12px 20px;
             color: #adb5bd;
             text-decoration: none;
-            transition: background-color 0.3s, color 0.3s;
+            transition: background-color 0.3s, color 0.3s, border-left-color 0.3s;
+            border-left: 4px solid transparent; /* For active indicator */
+            font-weight: 500;
         }
-        .nav-link i {
-            margin-right: 10px;
+
+        .nav-link i.nav-icon {
+            width: 25px; /* Fixed width for icon */
+            margin-right: 15px;
+            font-size: 1.1rem;
+            text-align: center;
         }
+
         .nav-link:hover {
-            background-color: #495057;
+            background-color: #343a40;
             color: #fff;
+            border-left-color: #6c757d;
         }
+
         .nav-link.active {
-            background-color: #495057;
+            background-color: #0d6efd; /* Bootstrap primary color */
+            color: #fff;
+            border-left-color: #ffffff; /* White indicator */
+        }
+        
+        /* [IMPROVEMENT] Dropdown Submenu */
+        .nav-item .dropdown-toggle::after {
+            margin-left: auto; /* Push arrow to the right */
+            transition: transform 0.3s ease;
+        }
+        .nav-item .dropdown-toggle[aria-expanded="true"]::after {
+            transform: rotate(90deg);
+        }
+
+        .dropdown-menu {
+            background-color: #1a1d20;
+            border: none;
+            padding: 0;
+            margin-left: 20px; /* Indent submenu */
+        }
+
+        .dropdown-item {
+            color: #adb5bd;
+            padding: 10px 20px;
+        }
+        .dropdown-item:hover, .dropdown-item:focus {
+            background-color: #343a40;
             color: #fff;
         }
-        .nav-item:last-child {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
+        
+        /* [IMPROVEMENT] Logout/Back button at the bottom */
+        .nav-item.mt-auto {
+            border-top: 1px solid #343a40;
         }
+
         .topbar {
             height: 60px;
             display: flex;
             justify-content: flex-end;
             align-items: center;
-            padding: 0 20px;
+            padding: 0 30px;
             position: fixed;
             top: 0;
-            left: 250px;
+            left: 260px;
             right: 0;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            z-index: 1000;
         }
-        .topbar .admin-info {
-            display: flex;
-            align-items: center;
+
+        /* [IMPROVEMENT] Admin Dropdown */
+        .admin-info .dropdown-toggle {
+            color: #343a40;
         }
-        .topbar .admin-info i {
+        .admin-info .dropdown-toggle::after {
+            display: none; /* Hide default arrow */
+        }
+        .admin-info img {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
             margin-right: 10px;
-            font-size: 1.2rem;
+        }
+
+        .main-content {
+            margin-left: 260px; 
+            padding: 80px 30px 30px 30px; /* 60px topbar + 20px space */
+            transition: margin-left 0.3s ease;
         }
     </style>
 </head>
 <body>
-    <nav>
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <h2>Admin</h2>
-            </div>
-            <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a class="nav-link" href="/admin/home" onclick="setActiveLink(this)">
-                        <i class="fas fa-tachometer-alt"></i> Home
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/admin/admin-kelola-barang" onclick="setActiveLink(this)">
-                        <i class="fas fa-cog"></i> Tambahkan Barang
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/admin/admin-kelola-gudang" onclick="setActiveLink(this)">
-                        <i class="fas fa-tools"></i> Kelola Gudang
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/" onclick="setActiveLink(this)">
-                        <i class="fas fa-arrow-left"></i> Back
-                    </a>
-                </li>
-            </ul>
-            <script>
-                function setActiveLink(element) {
-                    // Remove active class from all links
-                    const links = document.querySelectorAll('.nav-link');
-                    links.forEach(link => link.classList.remove('active'));
-
-                    // Add active class to the clicked link
-                    element.classList.add('active');
-                }
-
-                // Set active link based on current URL
-                document.addEventListener('DOMContentLoaded', () => {
-                    const currentPath = window.location.pathname;
-                    const links = document.querySelectorAll('.nav-link');
-                    links.forEach(link => {
-                        if (link.getAttribute('href') === currentPath) {
-                            link.classList.add('active');
-                        }
-                    });
-                });
-            </script>
+    
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h2>Admin</h2>
         </div>
-            <div class="topbar">
-        <div class="admin-info">
-            <i class="fas fa-user-circle"></i>
-        </div>
-    </div>
-    <div style="margin-left: 250px; padding-top: 60px;">    
+        
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/home">
+                    <i class="fas fa-tachometer-alt nav-icon"></i> Home
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#kelolaSubmenu" aria-expanded="false" aria-controls="kelolaSubmenu">
+                    <i class="fas fa-box-open nav-icon"></i> Kelola Inventaris
+                </a>
+                <div class="collapse" id="kelolaSubmenu">
+                    <ul class="nav flex-column ms-4">
+                        <li class="nav-item">
+                           <a class="nav-link" href="/admin/admin-kelola-barang">Tambahkan Barang</a>
+                        </li>
+                        <li class="nav-item">
+                           <a class="nav-link" href="/admin/admin-kelola-gudang">Kelola Gudang</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+            
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="fas fa-chart-bar nav-icon"></i> Laporan
+                </a>
+            
+            <li class="nav-item mt-auto">
+                <a class="nav-link" href="/">
+                    <i class="fas fa-sign-out-alt nav-icon"></i> Kembali / Logout
+                </a>
+            </li>
+        </ul>
     </nav>
-        {%block isi %}  {%endblock%}
+
+    <div class="topbar">
+        <div class="admin-info dropdown">
+            <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                <img src="https://i.pravatar.cc/40" alt="" class="rounded-circle me-2">
+                <strong>Admin User</strong>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end text-small shadow" aria-labelledby="dropdownUser1">
+                <li><a class="dropdown-item" href="#">Profil</a></li>
+                <li><a class="dropdown-item" href="#">Pengaturan</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#">Logout</a></li>
+            </ul>
+        </div>
     </div>
+    
+    <div class="main-content">
+        {% block isi %} {% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function addHoverEffect(element) {
-            element.style.backgroundColor = '#495057';
-            element.style.color = '#fff';
-        }
-        function removeHoverEffect(element) {
-            element.style.backgroundColor = '';
-            element.style.color = '';
-        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentPath = window.location.pathname;
+            const links = document.querySelectorAll('.sidebar .nav-link');
+            
+            links.forEach(link => {
+                // Check if the link's href is the current path
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+
+                    // If the active link is inside a collapsed submenu, expand it
+                    const collapse = link.closest('.collapse');
+                    if (collapse) {
+                        new bootstrap.Collapse(collapse, {
+                            toggle: true
+                        });
+                    }
+                }
+            });
+        });
     </script>
 </body>
 </html>

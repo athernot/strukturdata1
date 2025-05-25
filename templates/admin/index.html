@@ -1,149 +1,420 @@
 {% extends 'admin/layout.html' %}
 {% block isi %}
-<div class="container" style="display: flex; justify-content: center; align-items: flex-start; padding: 20px;">
-    <div class="row" style="width: 100%; max-width: 1200px; display: flex; justify-content: center; gap: 20px;">
-        <!-- Card: Jumlah Barang -->
-        <div class="card" style="width: 18rem; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-radius: 8px; background-color: #f8f9fa;">
-            <div class="card-body" style="text-align: center;">
-                <h5 class="card-title" style="color: #007bff;">
-                    <i class="fas fa-box"></i> Jumlah Barang
-                </h5>
-                <p class="card-text" style="font-size: 1.2rem; font-weight: bold;">100</p>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@3.49.0/dist/apexcharts.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+<div class="container-fluid px-4 pb-4">
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-4">
+        <h1 class="fw-bold text-dark-emphasis">Dashboard</h1>
+        <div class="d-flex align-items-center">
+            <i class="fas fa-calendar-alt text-muted me-2"></i>
+            <select id="dateRangeFilter" class="form-select form-select-sm" style="width: auto;">
+                <option value="last7days">7 Hari Terakhir</option>
+                <option value="thisMonth" selected>Bulan Ini</option>
+                <option value="last30days">30 Hari Terakhir</option>
+                <option value="thisYear">Tahun Ini</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card text-white bg-primary shadow-sm rounded-4 card-hover-lift">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="small text-white-75">Total Barang</div>
+                            <div class="fs-2 fw-bold" id="totalBarang">1.280</div>
+                        </div>
+                        <i class="fas fa-box fa-3x text-white-50"></i>
+                    </div>
+                    <div class="small mt-2 text-white-75">+5% dari bulan lalu</div>
+                </div>
             </div>
         </div>
-        <!-- Card: Barang Masuk -->
-        <div class="card" style="width: 18rem; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-radius: 8px; background-color: #f8f9fa;">
-            <div class="card-body" style="text-align: center;">
-                <h5 class="card-title" style="color: #28a745;">
-                    <i class="fas fa-arrow-down"></i> Barang Masuk
-                </h5>
-                <p class="card-text" style="font-size: 1.2rem; font-weight: bold;">50</p>
+        <div class="col-xl-3 col-md-6">
+            <div class="card text-white bg-success shadow-sm rounded-4 card-hover-lift">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="small text-white-75">Barang Masuk</div>
+                            <div class="fs-2 fw-bold" id="barangMasuk">152</div>
+                        </div>
+                        <i class="fas fa-dolly fa-3x text-white-50"></i>
+                    </div>
+                    <div class="small mt-2 text-white-75">Periode: Bulan Ini</div>
+                </div>
             </div>
         </div>
-        <!-- Card: Barang Keluar -->
-        <div class="card" style="width: 18rem; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-radius: 8px; background-color: #f8f9fa;">
-            <div class="card-body" style="text-align: center;">
-                <h5 class="card-title" style="color: #dc3545;">
-                    <i class="fas fa-arrow-up"></i> Barang Keluar
-                </h5>
-                <p class="card-text" style="font-size: 1.2rem; font-weight: bold;">30</p>
+        <div class="col-xl-3 col-md-6">
+            <div class="card text-white bg-danger shadow-sm rounded-4 card-hover-lift">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="small text-white-75">Barang Keluar</div>
+                            <div class="fs-2 fw-bold" id="barangKeluar">98</div>
+                        </div>
+                        <i class="fas fa-truck-loading fa-3x text-white-50"></i>
+                    </div>
+                    <div class="small mt-2 text-white-75">Periode: Bulan Ini</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card text-white bg-warning shadow-sm rounded-4 card-hover-lift">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="small text-white-75">Stok Kritis</div>
+                            <div class="fs-2 fw-bold" id="stokKritis">12</div>
+                        </div>
+                        <i class="fas fa-exclamation-triangle fa-3x text-white-50"></i>
+                    </div>
+                    <a class="small mt-2 text-white-75 text-decoration-none" href="#">Lihat detail <i class="fas fa-angle-right"></i></a>
+                </div>
             </div>
         </div>
     </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-12">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header bg-light py-3 border-0">
+                    <h6 class="mb-0 fw-bold text-dark-emphasis"><i class="fas fa-chart-line me-2"></i> Tren Penjualan & Pendapatan</h6>
+                </div>
+                <div class="card-body">
+                    <div id="salesRevenueChart"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-header bg-light py-3 border-0">
+                    <h6 class="mb-0 fw-bold text-dark-emphasis"><i class="fas fa-history me-2"></i> Aktivitas Gudang Terkini</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-arrow-down text-success fs-4 me-3"></i>
+                            <div>
+                                <div class="fw-semibold">Kaos Polos Katun <span class="badge bg-success-subtle text-success-emphasis rounded-pill ms-2">Masuk</span></div>
+                                <small class="text-muted">50 Pcs &middot; 25 Mei 2024, 10:15</small>
+                            </div>
+                        </div>
+                         <div class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-arrow-up text-danger fs-4 me-3"></i>
+                            <div>
+                                <div class="fw-semibold">Sepatu Lari Adidas <span class="badge bg-danger-subtle text-danger-emphasis rounded-pill ms-2">Keluar</span></div>
+                                <small class="text-muted">5 Pcs &middot; 24 Mei 2024, 17:30</small>
+                            </div>
+                        </div>
+                        <div class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-arrow-down text-success fs-4 me-3"></i>
+                            <div>
+                                <div class="fw-semibold">Celana Jeans Levis <span class="badge bg-success-subtle text-success-emphasis rounded-pill ms-2">Masuk</span></div>
+                                <small class="text-muted">20 Pcs &middot; 24 Mei 2024, 09:00</small>
+                            </div>
+                        </div>
+                        <div class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-sync-alt text-warning fs-4 me-3"></i>
+                            <div>
+                                <div class="fw-semibold">Topi Baseball <span class="badge bg-warning-subtle text-warning-emphasis rounded-pill ms-2">Pending</span></div>
+                                <small class="text-muted">30 Pcs &middot; 23 Mei 2024, 11:20</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <a class="card-footer text-center small text-muted text-decoration-none" href="#">Lihat Semua Aktivitas <i class="fas fa-angle-right ms-1"></i></a>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+             <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-header bg-light py-3 border-0">
+                    <h6 class="mb-0 fw-bold text-dark-emphasis"><i class="fas fa-fire me-2"></i> Produk Terlaris</h6>
+                </div>
+                <div class="card-body p-0">
+                     <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th scope="col" class="ps-3">Produk</th>
+                                    <th scope="col" class="text-end pe-3">Terjual</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="ps-3">Kaos Polos Katun</td>
+                                    <td class="text-end pe-3 fw-bold">120</td>
+                                </tr>
+                                <tr>
+                                    <td class="ps-3">Sepatu Lari Adidas</td>
+                                    <td class="text-end pe-3 fw-bold">98</td>
+                                </tr>
+                                 <tr>
+                                    <td class="ps-3">Jaket Bomber</td>
+                                    <td class="text-end pe-3 fw-bold">75</td>
+                                </tr>
+                                <tr>
+                                    <td class="ps-3">Celana Jeans Levis</td>
+                                    <td class="text-end pe-3 fw-bold">62</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                 <a class="card-footer text-center small text-muted text-decoration-none" href="#">Laporan Lengkap <i class="fas fa-angle-right ms-1"></i></a>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+             <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-header bg-light py-3 border-0">
+                    <h6 class="mb-0 fw-bold text-dark-emphasis"><i class="fas fa-chart-pie me-2"></i> Komposisi Stok by Kategori</h6>
+                </div>
+                <div class="card-body d-flex align-items-center justify-content-center">
+                    <div id="stockCompositionChart" style="min-height: 280px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row g-4 mt-0 mb-4">
+        <div class="col-lg-12">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header bg-light py-3 border-0">
+                    <h6 class="mb-0 fw-bold text-dark-emphasis"><i class="fas fa-map-marked-alt me-2"></i> Peta Penjualan per Wilayah</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div id="salesMap" style="height: 400px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
-<!-- Add Font Awesome for icons -->
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<style>
+    :root {
+        --bs-primary-rgb: 78, 115, 223; /* Contoh warna biru modern */
+        --bs-success-rgb: 28, 200, 138;
+        --bs-danger-rgb: 231, 74, 59;
+        --bs-warning-rgb: 246, 194, 62;
+    }
+    body {
+        background-color: #f0f2f5; /* Latar belakang sedikit abu-abu */
+    }
+    .card-hover-lift {
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .card-hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.1) !important;
+    }
+    .text-white-50 { opacity: 0.5; }
+    .text-white-75 { opacity: 0.75; }
 
-<div class="container" style="display: flex; justify-content: center; align-items: flex-start; padding: 40px; flex-wrap: wrap; gap: 30px;">
-    <!-- Grafik Barang -->
-    <div class="card" style="width: 48%; padding: 30px; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); border-radius: 12px; text-align: center; background-color: #ffffff;">
-        <h1 style="font-size: 1.5rem; color: #333;">Grafik Barang</h1>
-        <canvas id="dashboardChart" width="800" height="400"></canvas>
-    </div>
-    <!-- Grafik Pendapatan -->
-    <div class="card" style="width: 48%; padding: 30px; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); border-radius: 12px; text-align: center; background-color: #ffffff;">
-        <h1 style="font-size: 1.5rem; color: #333;">Grafik Pendapatan</h1>
-        <canvas id="revenueChart" width="800" height="400"></canvas>
-    </div>
-</div>
+    .bg-light {
+        background-color: #ffffff !important;
+    }
+    .text-dark-emphasis {
+        color: #343a40 !important;
+    }
+    
+    /* ApexCharts Tooltip Style */
+    .apexcharts-tooltip {
+        background: #fff;
+        color: #333;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1);
+    }
+    .apexcharts-tooltip-title {
+        background: #f8f9fa;
+        font-weight: bold;
+        padding: 6px 10px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+</style>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.49.0/dist/apexcharts.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
 <script>
-    // Dashboard Chart
-    const ctx1 = document.getElementById('dashboardChart').getContext('2d');
-    const dashboardChart = new Chart(ctx1, {
-        type: 'bar',
-        data: {
-            labels: ['Januari', 'Februari', 'Maret', 'April', 'Mei'],
-            datasets: [{
-                label: 'Data Penjualan',
-                data: [12, 19, 3, 5, 2],
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.3)',
-                    'rgba(54, 162, 235, 0.3)',
-                    'rgba(255, 206, 86, 0.3)',
-                    'rgba(75, 192, 192, 0.3)',
-                    'rgba(153, 102, 255, 0.3)'
-                ],
-                borderColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)'
-                ],
-                borderWidth: 1.5
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        color: '#555',
-                        font: { size: 14 }
-                    }
-                },
-                x: {
-                    ticks: {
-                        color: '#555',
-                        font: { size: 14 }
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    labels: {
-                        color: '#333',
-                        font: { size: 14 }
-                    }
-                }
-            }
-        }
-    });
+document.addEventListener('DOMContentLoaded', () => {
 
-    // Revenue Chart
-    const ctx2 = document.getElementById('revenueChart').getContext('2d');
-    const revenueChart = new Chart(ctx2, {
-        type: 'line',
-        data: {
-            labels: ['Januari', 'Februari', 'Maret', 'April', 'Mei'],
-            datasets: [{
-                label: 'Pendapatan',
-                data: [500, 700, 400, 800, 600],
-                backgroundColor: 'rgba(75, 192, 192, 0.3)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 2,
-                fill: true
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        color: '#555',
-                        font: { size: 14 }
-                    }
-                },
-                x: {
-                    ticks: {
-                        color: '#555',
-                        font: { size: 14 }
-                    }
+    // Helper untuk format angka
+    const formatCurrency = (value) => `Rp ${value.toLocaleString('id-ID')}`;
+
+    // 1. Grafik Tren Penjualan & Pendapatan (ApexCharts)
+    const salesRevenueChartOptions = {
+        series: [{
+            name: 'Pendapatan',
+            type: 'area',
+            data: [1200000, 1900000, 1300000, 2500000, 2200000, 3000000, 2800000]
+        }, {
+            name: 'Barang Terjual',
+            type: 'column',
+            data: [50, 70, 60, 90, 80, 110, 100]
+        }],
+        chart: {
+            height: 350,
+            type: 'line',
+            stacked: false,
+            toolbar: {
+                show: true,
+                tools: {
+                    download: true,
+                    selection: false,
+                    zoom: true,
+                    zoomin: true,
+                    zoomout: true,
+                    pan: true,
                 }
+            }
+        },
+        stroke: {
+            width: [2, 0],
+            curve: 'smooth'
+        },
+        plotOptions: {
+            bar: {
+                columnWidth: '50%'
+            }
+        },
+        fill: {
+            opacity: [0.25, 1],
+            gradient: {
+                inverseColors: false,
+                shade: 'light',
+                type: "vertical",
+                opacityFrom: 0.85,
+                opacityTo: 0.55,
+                stops: [0, 100, 100, 100]
+            }
+        },
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul'],
+        markers: {
+            size: 0
+        },
+        xaxis: {
+            type: 'category'
+        },
+        yaxis: [{
+            title: {
+                text: 'Pendapatan (Rp)',
             },
-            plugins: {
-                legend: {
+            labels: {
+                formatter: (value) => formatCurrency(value),
+            }
+        }, {
+            opposite: true,
+            title: {
+                text: 'Unit Terjual'
+            }
+        }],
+        tooltip: {
+            shared: true,
+            intersect: false,
+            y: {
+                formatter: function (y, { seriesIndex }) {
+                    if (typeof y !== "undefined") {
+                        return seriesIndex === 0 ? formatCurrency(y) : y + " unit";
+                    }
+                    return y;
+                }
+            }
+        },
+        legend: {
+            position: 'top',
+            horizontalAlign: 'right',
+            offsetY: -10
+        },
+        grid: {
+            borderColor: '#f1f1f1',
+        }
+    };
+    
+    const salesRevenueChart = new ApexCharts(document.querySelector("#salesRevenueChart"), salesRevenueChartOptions);
+    salesRevenueChart.render();
+
+
+    // 2. Grafik Komposisi Stok (ApexCharts - RadialBar/Donut)
+    const stockCompositionChartOptions = {
+        series: [44, 55, 41, 17, 15],
+        chart: {
+            type: 'donut',
+            height: 320,
+        },
+        labels: ['Pakaian', 'Elektronik', 'Perabotan', 'Makanan', 'Lainnya'],
+        plotOptions: {
+            pie: {
+                donut: {
                     labels: {
-                        color: '#333',
-                        font: { size: 14 }
+                        show: true,
+                        total: {
+                            show: true,
+                            label: 'Total Stok',
+                            formatter: function (w) {
+                                const total = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                                return total + ' Unit';
+                            }
+                        }
                     }
                 }
             }
-        }
+        },
+        dataLabels: {
+            enabled: false
+        },
+        legend: {
+            position: 'bottom',
+            horizontalAlign: 'center',
+        },
+        responsive: [{
+            breakpoint: 480,
+            options: {
+                chart: {
+                    width: 200
+                },
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }]
+    };
+
+    const stockCompositionChart = new ApexCharts(document.querySelector("#stockCompositionChart"), stockCompositionChartOptions);
+    stockCompositionChart.render();
+    
+    // 3. Peta Penjualan (Leaflet.js)
+    // Inisialisasi peta berpusat di Indonesia
+    const map = L.map('salesMap').setView([-2.548926, 118.0148634], 5);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Dummy data untuk marker
+    const salesLocations = [
+        { lat: -6.2088, lng: 106.8456, city: 'Jakarta', sales: 1500 },
+        { lat: -7.2575, lng: 112.7521, city: 'Surabaya', sales: 1200 },
+        { lat: -6.9175, lng: 107.6191, city: 'Bandung', sales: 950 },
+        { lat: -0.9471, lng: 100.3642, city: 'Padang', sales: 450 },
+        { lat: 3.5952,  lng: 98.6722,  city: 'Medan', sales: 800 },
+        { lat: -5.1477, lng: 119.4327, city: 'Makassar', sales: 600 }
+    ];
+
+    salesLocations.forEach(loc => {
+        const marker = L.marker([loc.lat, loc.lng]).addTo(map);
+        marker.bindPopup(`<b>${loc.city}</b><br>Penjualan: ${loc.sales} unit`).openPopup();
     });
+});
 </script>
+
 {% endblock %}

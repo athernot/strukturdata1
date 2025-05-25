@@ -1,35 +1,278 @@
-{%extends 'user/layout.html'%}
-{%block isi%}
-<!-- Cards Section -->
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-md-4">
-            <div class="card" style="width: 18rem; transition: transform 0.3s, background-color 0.3s;" onmouseover="this.style.backgroundColor='#f8f9fa'; this.style.transform='scale(1.05)';" onmouseout="this.style.backgroundColor=''; this.style.transform='scale(1)';">
-                <img src="https://dynamic.zacdn.com/VBOhGE8BRvUaA4uu4zhOx_AB2yw=/filters:quality(70):format(webp)/https://static-id.zacdn.com/p/atva-2153-0396233-1.jpg" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">Card 1</h5>
-                    <p class="card-text">This is the first card.</p>
+{% extends 'user/layout.html' %}
+{% block isi %}
+<style>
+    /* Styling Dasar Section */
+    .section-bg {
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+        min-height: 100vh;
+        padding: 4rem 0;
+    }
+
+    /* === [BARU] Header Animasi === */
+    .animated-header h1 {
+        font-size: 2.8rem;
+        font-weight: 700;
+        color: #fff;
+        text-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+        animation: fadeInUp 1s ease-out;
+    }
+
+    .animated-header p {
+        color: #adb5bd;
+        font-size: 1.2rem;
+        animation: fadeInUp 1s ease-out 0.3s;
+        animation-fill-mode: backwards; /* Start animation even if delayed */
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* === [BARU] Tombol Filter === */
+    .filter-controls {
+        margin-bottom: 2.5rem;
+        animation: fadeInUp 1s ease-out 0.6s;
+        animation-fill-mode: backwards;
+        }
+        .filter-btn {
+        background: transparent;
+        border: 1px solid #3498db;
+        color: #3498db;
+        padding: 0.5rem 1.5rem;
+        margin: 0 0.5rem;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+        }
+        .filter-btn:hover {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        border-color: #764ba2;
+        transform: translateY(-2px);
+        }
+        .filter-btn.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        border-color: #764ba2;
+        box-shadow: 0 0 15px rgba(118, 75, 162, 0.4);
+        }
+    
+
+    /* Styling Kartu Interaktif (Sedikit Penyesuaian) */
+    .card-interactive {
+        background: linear-gradient(145deg, #2c2c2c, #1a1a1a);
+        border: 1px solid #404040;
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        overflow: hidden;
+        position: relative;
+    }
+    .card-interactive::before {
+        content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.5s; z-index: 1;
+    }
+    .card-interactive:hover::before { left: 100%; }
+    .card-interactive:hover {
+        transform: translateY(-15px) scale(1.02);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); border-color: #666;
+    }
+    .card-interactive .card-img-top {
+        transition: all 0.4s ease; border-radius: 15px 15px 0 0; filter: brightness(0.9);
+    }
+    .card-interactive:hover .card-img-top { filter: brightness(1.1) contrast(1.1); transform: scale(1.05); }
+    .card-interactive .card-body {
+        background: rgba(40, 40, 40, 0.9); color: #f8f9fa; position: relative;
+        z-index: 2; backdrop-filter: blur(10px);
+    }
+    .card-interactive .card-title {
+        color: #ffffff; font-weight: 600; font-size: 1.4rem; margin-bottom: 0.8rem; transition: color 0.3s ease;
+    }
+    .card-interactive:hover .card-title { color: #764ba2; text-shadow: 0 0 10px rgba(118, 75, 162, 0.3); }
+    .card-interactive .card-text { color: #e0e0e0; transition: color 0.3s ease; line-height: 1.6; }
+    .card-interactive:hover .card-text { color: #ffffff; }
+
+    /* Tombol Interaktif */
+    .btn-interactive {
+        background: linear-gradient(45deg, #333, #555); border: 1px solid #666; color: #fff;
+        padding: 0.6rem 1.5rem; border-radius: 25px; transition: all 0.3s ease;
+        text-decoration: none; display: inline-block; margin-top: 1rem; position: relative; overflow: hidden;
+    }
+    .btn-interactive:hover { color: #ffd700; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4); }
+
+    /* === [BARU] Styling untuk Modal Dark Theme === */
+    .modal-dark .modal-content {
+        background: linear-gradient(145deg, #2c2c2c, #1a1a1a);
+        color: #f8f9fa;
+        border: 1px solid #555;
+        border-radius: 15px;
+        backdrop-filter: blur(15px);
+        background-color: rgba(30, 30, 30, 0.8);
+    }
+    .modal-dark .modal-header {
+        border-bottom: 1px solid #ffd700;
+    }
+    .modal-dark .modal-title {
+        color: #ffd700;
+        font-weight: 600;
+    }
+    .modal-dark .btn-close {
+        filter: invert(1) grayscale(100%) brightness(200%); /* Make close button white */
+    }
+    .modal-dark .modal-body img {
+        max-width: 100%;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+    }
+    .modal-dark .modal-footer {
+        border-top: 1px solid #444;
+    }
+
+    /* Animasi Pulse (Tetap) */
+    .pulse-effect { animation: pulse 2s infinite; }
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.1); }
+        70% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+    }
+</style>
+
+<div class="section-bg">
+    <div class="container">
+        <div class="text-center mb-5 animated-header">
+            <h1>Our Creations</h1>
+            <p>A Glimpse into Our World of Innovation</p>
+        </div>
+
+        <div class="text-center filter-controls">
+            <button class="btn filter-btn active">All</button>
+            <button class="btn filter-btn">Premium</button>
+            <button class="btn filter-btn">Limited</button>
+            <button class="btn filter-btn">Signature</button>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card card-interactive pulse-effect" style="animation-delay: 0.1s;">
+                    <img id="img-1" src="https://i.pinimg.com/736x/d4/6e/88/d46e8887e4a89e7d04daf811b42dd7f6.jpg" class="card-img-top" alt="Premium Collection" style="height: 250px; object-fit: cover;">
+                    <div class="card-body text-center">
+                        <h5 id="title-1" class="card-title">Premium Collection</h5>
+                        <p id="text-1" class="card-text">Discover our exclusive premium collection with cutting-edge design and superior quality.</p>
+                        <button class="btn btn-interactive" data-bs-toggle="modal" data-bs-target="#productModal" data-card="1">
+                            Explore Now
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card" style="width: 18rem; transition: transform 0.3s, background-color 0.3s;" onmouseover="this.style.backgroundColor='#f8f9fa'; this.style.transform='scale(1.05)';" onmouseout="this.style.backgroundColor=''; this.style.transform='scale(1)';">
-                <img src="https://dynamic.zacdn.com/VBOhGE8BRvUaA4uu4zhOx_AB2yw=/filters:quality(70):format(webp)/https://static-id.zacdn.com/p/atva-2153-0396233-1.jpg" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">Card 2</h5>
-                    <p class="card-text">This is the second card.</p>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card card-interactive pulse-effect" style="animation-delay: 0.3s;">
+                    <img id="img-2" src="https://i.pinimg.com/736x/dd/de/14/ddde149b1134c4387cd174a99b8d2e31.jpg" class="card-img-top" alt="Limited Edition" style="height: 250px; object-fit: cover;">
+                    <div class="card-body text-center">
+                        <h5 id="title-2" class="card-title">Limited Edition</h5>
+                        <p id="text-2" class="card-text">Experience the extraordinary with our limited edition series, crafted for the discerning individual.</p>
+                        <button class="btn btn-interactive" data-bs-toggle="modal" data-bs-target="#productModal" data-card="2">
+                            View Details
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card" style="width: 18rem; transition: transform 0.3s, background-color 0.3s;" onmouseover="this.style.backgroundColor='#f8f9fa'; this.style.transform='scale(1.05)';" onmouseout="this.style.backgroundColor=''; this.style.transform='scale(1)';">
-                <img src="https://dynamic.zacdn.com/VBOhGE8BRvUaA4uu4zhOx_AB2yw=/filters:quality(70):format(webp)/https://static-id.zacdn.com/p/atva-2153-0396233-1.jpg" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">Card 3</h5>
-                    <p class="card-text">This is the third card.</p>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card card-interactive pulse-effect" style="animation-delay: 0.5s;">
+                    <img id="img-3" src="https://i.pinimg.com/736x/96/3c/48/963c48f7f5be5b7cf05df0eedf845cb6.jpg" class="card-img-top" alt="Signature Series" style="height: 250px; object-fit: cover;">
+                    <div class="card-body text-center">
+                        <h5 id="title-3" class="card-title">Signature Series</h5>
+                        <p id="text-3" class="card-text">Immerse yourself in luxury with our signature series, where elegance meets innovation.</p>
+                        <button class="btn btn-interactive" data-bs-toggle="modal" data-bs-target="#productModal" data-card="3">
+                            Shop Now
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg modal-dark">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="productModalLabel">Product Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+            <div class="col-md-6">
+                <img id="modal-img" src="" class="img-fluid" alt="Product Image">
+            </div>
+            <div class="col-md-6 d-flex flex-column justify-content-center">
+                <h3 id="modal-title" class="fw-bold"></h3>
+                <p id="modal-text"></p>
+                <div class="mt-3">
+                    <a href="#" class="btn btn-interactive">Add to Cart</a>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // === Skrip Interaksi Kartu yang Sudah Ada ===
+    const cards = document.querySelectorAll('.card-interactive');
+    cards.forEach(card => {
+        card.addEventListener('mousemove', function(e) {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left; const y = e.clientY - rect.top;
+            const centerX = rect.width / 2; const centerY = rect.height / 2;
+            const rotateX = (y - centerY) / 10; const rotateY = (centerX - x) / 10;
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-10px) scale(1.02)`;
+        });
+        card.addEventListener('mouseleave', function() { card.style.transform = 'translateY(0) scale(1)'; });
+    });
+
+    // === [BARU] Skrip untuk Tombol Filter ===
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+
+    // === [BARU] Skrip untuk Mengisi data Modal ===
+    const productModal = document.getElementById('productModal');
+    productModal.addEventListener('show.bs.modal', function (event) {
+        // Tombol yang memicu modal
+        const button = event.relatedTarget;
+        // Ekstrak info dari atribut data-*
+        const cardId = button.getAttribute('data-card');
+
+        // Ambil konten dari kartu yang sesuai
+        const title = document.getElementById('title-' + cardId).textContent;
+        const text = document.getElementById('text-' + cardId).textContent;
+        const imgSrc = document.getElementById('img-' + cardId).src;
+
+        // Perbarui konten modal
+        const modalTitle = productModal.querySelector('#modal-title');
+        const modalText = productModal.querySelector('#modal-text');
+        const modalImg = productModal.querySelector('#modal-img');
+        
+        modalTitle.textContent = title;
+        modalText.textContent = text;
+        modalImg.src = imgSrc;
+    });
+});
+</script>
+
 {%endblock%}

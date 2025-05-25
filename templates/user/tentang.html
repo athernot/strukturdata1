@@ -1,56 +1,191 @@
-{%extends 'user/layout.html'%}
+{% extends 'user/layout.html' %}
 
-{%block isi%}
-<div class="container my-5">
-    <h1 class="text-primary mb-4">Tentang</h1>
-    <p>
-        Oh feel if up to till like. He an thing rapid these after going drawn or. Timed she his law the spoil round defer. In surprise concerns informed betrayed he learning is ye. Ignorant formerly so ye blessing.
-    </p>
-    <h5 class="mb-5">
-        He as spoke avoid given downs money on we. Of properly carriage shutters ye as wandered up repeated moreover.
-    </h5>
-    <div class="row g-4">
-        <div class="col-12 col-md-4">
-            <div class="card h-100 shadow-sm border-0" style="background: #f8fafc;">
-            <div class="card-body text-center d-flex flex-column justify-content-center align-items-center" style="min-height: 340px;">
-                <div class="icon mb-3">
-                <i class="fas fa-mobile-alt fa-3x" style="color: #0d6efd;"></i>
-                </div>
-                <h5 class="card-title mb-3" style="color: #0d6efd;">Research</h5>
-                <p class="card-text" style="color: #495057;">
-                Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+{% block isi %}
+<style>
+    /* Latar belakang utama untuk section */
+    .about-section-bg {
+        background: linear-gradient(135deg, #1f2023 0%, #2c3e50 100%);
+        padding: 5rem 0;
+        color: #f8f9fa;
+        overflow-x: hidden; /* Mencegah scroll horizontal karena animasi */
+    }
+
+    /* Header Section */
+    .intro-header h1 {
+        font-size: 3.2rem; /* Sedikit lebih besar untuk dampak */
+        font-weight: 700;
+        animation: slideInFromLeft 1s ease-out;
+    }
+    .intro-header .lead {
+        animation: slideInFromLeft 1s ease-out 0.2s;
+        animation-fill-mode: backwards;
+    }
+    .intro-header .btn-custom {
+        background-color: #0d6efd;
+        border: none;
+        padding: 12px 30px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        animation: fadeIn 1s ease-out 0.4s;
+        animation-fill-mode: backwards;
+        border-radius: 50px; /* Membuat tombol lebih stylish */
+    }
+    .intro-header .btn-custom:hover {
+        background-color: #0b5ed7;
+        transform: translateY(-3px);
+        box-shadow: 0 4px 15px rgba(13, 110, 253, 0.4);
+    }
+    .intro-image {
+        animation: fadeIn 1.5s ease-in-out;
+        border-radius: 20px;
+    }
+
+    /* Desain Kartu Glassmorphism */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        transition: all 0.4s ease;
+        height: 100%;
+    }
+    .glass-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+    .glass-card .icon i {
+        color: #0d6efd; /* Warna ikon biru */
+        transition: all 0.3s ease;
+    }
+    .glass-card:hover .icon i {
+        color: #fff;
+        transform: scale(1.1);
+        text-shadow: 0 0 15px #0d6efd;
+    }
+    .glass-card .card-title {
+        color: #fff;
+    }
+    .glass-card .card-text {
+        color: #ced4da;
+    }
+
+    /* Komponen Timeline Proses Kerja */
+    .process-timeline {
+        position: relative;
+        padding: 2rem 0;
+    }
+    /* Garis timeline dihilangkan sesuai permintaan sebelumnya */
+    .timeline-step {
+        position: relative;
+        text-align: center;
+    }
+    .timeline-icon {
+        width: 70px;
+        height: 70px;
+        background: #2c3e50;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        margin: 0 auto;
+        transition: all 0.3s ease;
+    }
+    .timeline-step:hover .timeline-icon {
+        background: #0d6efd;
+        border-color: #fff;
+        transform: scale(1.1);
+    }
+    .timeline-step h5 {
+        margin-top: 1rem;
+        font-weight: 600;
+    }
+    
+    /* Animasi */
+    @keyframes slideInFromLeft {
+        from { transform: translateX(-50px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+</style>
+
+<div class="about-section-bg">
+    <div class="container">
+        <div class="row align-items-center mb-5 pb-5">
+            <div class="col-lg-7 intro-header">
+                <h1 class="display-4 fw-bold">Temukan Gaya Khas Anda.</h1>
+                <p class="lead my-4 text-white-50">
+                    Setiap jahitan menceritakan sebuah kisah. Koleksi pilihan kami memadukan desain modern dengan material berkualitas untuk gaya yang tak lekang oleh waktu dan kenyamanan maksimal.
                 </p>
+                <a href="#koleksi" class="btn btn-primary btn-lg btn-custom">Jelajahi Koleksi</a>
             </div>
+            <div class="col-lg-5 d-none d-lg-block text-center">
+                <img src="https://images.pexels.com/photos/1926769/pexels-photo-1926769.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" class="img-fluid intro-image" alt="Fashion Collection">
             </div>
         </div>
-        <div class="col-12 col-md-4">
-            <div class="card h-100 shadow-sm border-0" style="background: #e9ecef;">
-            <div class="card-body text-center d-flex flex-column justify-content-center align-items-center" style="min-height: 340px;">
-                <div class="icon mb-3">
-                <i class="fas fa-cog fa-3x" style="color: #6610f2;"></i>
-                </div>
-                <h5 class="card-title mb-3" style="color: #6610f2;">Strategy</h5>
-                <p class="card-text" style="color: #495057;">
-                Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                </p>
-            </div>
-            </div>
-        </div>
-        <div class="col-12 col-md-4">
-            <div class="card h-100 shadow-sm border-0" style="background: #f8fafc;">
-            <div class="card-body text-center d-flex flex-column justify-content-center align-items-center" style="min-height: 340px;">
-                    <div class="icon mb-3">
-                        <i class="fas fa-bell fa-3x text-primary"></i>
+
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="glass-card">
+                    <div class="card-body text-center p-4 p-lg-5">
+                        <div class="icon mb-3"><i class="fas fa-drafting-compass fa-3x"></i></div>
+                        <h5 class="card-title fw-bold mb-3">Desain Eksklusif</h5>
+                        <p class="card-text">Setiap produk dirancang oleh tim desainer kami untuk menciptakan siluet yang unik dan mengikuti tren terkini.</p>
                     </div>
-                    <h5 class="card-title mb-3">Design</h5>
-                    <p class="card-text">
-                        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                    </p>
                 </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="glass-card">
+                    <div class="card-body text-center p-4 p-lg-5">
+                        <div class="icon mb-3"><i class="fas fa-gem fa-3x"></i></div>
+                        <h5 class="card-title fw-bold mb-3">Material Premium</h5>
+                        <p class="card-text">Kami hanya menggunakan bahan-bahan terbaik yang dipilih secara saksama untuk kenyamanan dan daya tahan produk.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="glass-card">
+                    <div class="card-body text-center p-4 p-lg-5">
+                        <div class="icon mb-3"><i class="fas fa-star fa-3x"></i></div>
+                        <h5 class="card-title fw-bold mb-3">Kualitas Terjamin</h5>
+                        <p class="card-text">Melalui kontrol kualitas yang ketat, kami memastikan setiap item yang Anda terima adalah yang terbaik.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-5 pt-5">
+            <h2 class="fw-bold">Di Balik Layar Koleksi Kami</h2>
+            <p class="lead text-white-50 mb-5">Dari Ide Menjadi Pakaian Anda</p>
+        </div>
+        <div class="row process-timeline">
+            <div class="col-md-3 timeline-step">
+                <div class="timeline-icon"><i class="fas fa-pencil-ruler"></i></div>
+                <h5>1. Konsep & Desain</h5>
+                <p class="small text-white-50">Menciptakan mood board dan sketsa awal koleksi.</p>
+            </div>
+            <div class="col-md-3 timeline-step">
+                <div class="timeline-icon"><i class="fas fa-layer-group"></i></div>
+                <h5>2. Pemilihan Material</h5>
+                <p class="small text-white-50">Mencari kain dan aksesoris terbaik dari seluruh dunia.</p>
+            </div>
+            <div class="col-md-3 timeline-step">
+                <div class="timeline-icon"><i class="fas fa-cut"></i></div>
+                <h5>3. Produksi & Jahitan</h5>
+                <p class="small text-white-50">Pola dipotong dan dijahit oleh para ahli dengan presisi tinggi.</p>
+            </div>
+            <div class="col-md-3 timeline-step">
+                <div class="timeline-icon"><i class="fas fa-box-open"></i></div>
+                <h5>4. Rilis & Pengiriman</h5>
+                <p class="small text-white-50">Produk siap untuk menjadi bagian dari gaya Anda.</p>
             </div>
         </div>
     </div>
 </div>
-<!-- FontAwesome CDN -->
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-{%endblock%}
+{% endblock %}

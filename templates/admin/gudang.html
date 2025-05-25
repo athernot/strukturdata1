@@ -1,51 +1,48 @@
-{%extends 'admin/layout.html'%}
-{%block isi %}  
-<div class="content-wrapper ms-auto py-3 px-11"style="margin-left:250px  !important;">
-    <div class="card shadow mb-4">
-        <div class="card-header bg-dark py-3">
-            <h6 class="m-0 font-weight-bold text-white">Gudang</h6>
+{% extends 'admin/layout.html' %}
+{% block isi %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Data Gudang</h1>
+    <p class="mb-4">Lihat, tambah, edit, atau hapus data barang yang ada di gudang.</p>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+            <h5 class="mb-0 fw-bold text-secondary">Daftar Barang</h5>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#itemModal" onclick="prepareAddForm()">
+                <i class="fas fa-plus me-2"></i>Tambah Data Baru
+            </button>
         </div>
-        <div class="card-body p-0 bg-white">
+        <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="text-uppercase small text-muted">
+                <table class="table table-hover align-middle">
+                    <thead>
                         <tr>
-                            <th class="px-4">#</th>
-                            <th>ID Barang</th>
-                            <th>Nama Barang</th>
-                            <th>Tanggal</th>
-                            <th>Jumlah</th>
-                            <th class="text-center">ACTION</th>
+                            <th scope="col">#</th>
+                            <th scope="col">Nama Barang</th>
+                            <th scope="col">ID Barang</th>
+                            <th scope="col">Tanggal Masuk</th>
+                            <th scope="col">Jumlah</th>
+                            <th scope="col" class="text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for author in authors %}
+                        {% for item in items %}
                         <tr>
-                            <td class="px-4">
-                                <img src="{{ url_for('static', filename='img/avatars/' + author.avatar) }}" alt="{{ author.name }}" class="rounded-circle" width="40">
-                            </td>
+                            <td>{{ loop.index }}</td>
                             <td>
-                                <div class="d-flex flex-column">
-                                    <span class="font-weight-bold">{{ author.nama_barang }}</span>
-                                    <small class="text-muted">{{ author.tanggal }}</small>
-                                </div>
+                                <div class="fw-bold">{{ item.nama_barang }}</div>
                             </td>
-                            <td>
-                                <div class="d-flex flex-column">
-                                    <span>{{ author.role }}</span>
-                                    <small class="text-muted">{{ author.jumlah }}</small>
-                                </div>
-                            </td>
-                            <td>
-                                {% if author.is_online %}
-                                <span class="badge badge-pill bg-success text-white px-3 py-2">ONLINE</span>
-                                {% else %}
-                                <span class="badge badge-pill bg-secondary text-white px-3 py-2">OFFLINE</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ author.employed_date }}</td>
+                            <td><span class="badge bg-secondary">{{ item.id_barang }}</span></td>
+                            <td>{{ item.tanggal }}</td>
+                            <td>{{ item.jumlah }}</td>
                             <td class="text-center">
-                                <a href="{{ url_for('edit_author', id=author.id) }}" class="btn btn-outline-primary btn-sm px-3">Edit</a>
+                                <button class="btn btn-sm btn-info text-white" data-bs-toggle="modal" data-bs-target="#itemModal" 
+                                    onclick="prepareEditForm('{{ item.id }}', '{{ item.id_barang }}', '{{ item.nama_barang }}', '{{ item.tanggal }}', '{{ item.jumlah }}')">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                                <button class="btn btn-sm btn-danger ms-1" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" 
+                                    onclick="prepareDelete('{{ item.id }}')">
+                                    <i class="fas fa-trash-alt"></i> Hapus
+                                </button>
                             </td>
                         </tr>
                         {% endfor %}
@@ -56,43 +53,88 @@
     </div>
 </div>
 
-<!-- Add spacing at the bottom -->
-<div class="mb-5"></div>
+<div class="modal fade" id="itemModal" tabindex="-1" aria-labelledby="itemModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="itemModalLabel">Tambah Data Barang</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="itemForm" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" id="itemId" name="id">
+                    <div class="mb-3">
+                        <label for="id_barang" class="form-label">ID Barang</label>
+                        <input type="text" class="form-control" id="id_barang" name="id_barang" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="nama_barang" class="form-label">Nama Barang</label>
+                        <input type="text" class="form-control" id="nama_barang" name="nama_barang" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tanggal" class="form-label">Tanggal</label>
+                        <input type="date" class="form-control" id="tanggal" name="tanggal" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="jumlah" class="form-label">Jumlah</label>
+                        <input type="number" class="form-control" id="jumlah" name="jumlah" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary" id="saveButton">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
-<!-- Custom CSS to ensure proper layout -->
-<style>
-    /* Ensure content doesn't overlap with sidebar */
-    @media (min-width: 768px) {
-        .content-wrapper {
-            margin-left: 202px !important; /* Width of sidebar */
-            width: calc(100% - 202px) !important;
-        }
-    }
-    
-    /* For mobile devices */
-    @media (max-width: 767px) {
-        .content-wrapper {
-            margin-left: 0 !important;
-            width: 100% !important;
-        }
-    }
-    
-    /* Table styling */
-    .table th {
-        border-top: none;
-        color: #333;
-        font-size: 0.8rem;
-        font-weight: 600;
-    }
-    
-    /* Badge styling */
-    .badge.bg-success {
-        background-color: #2dce89 !important;
-    }
-    
-    .badge.bg-secondary {
-        background-color: #6c757d !important;
-    }
-</style>
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteConfirmModalLabel">Konfirmasi Hapus</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <form id="deleteForm" method="POST">
+                    <button type="submit" class="btn btn-danger">Ya, Hapus</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
-{%endblock%}
+<script>
+    const itemForm = document.getElementById('itemForm');
+    const modalTitle = document.getElementById('itemModalLabel');
+
+    function prepareAddForm() {
+        itemForm.reset();
+        modalTitle.textContent = 'Tambah Data Barang';
+        itemForm.action = "{{ url_for('add_item') }}";
+    }
+
+    function prepareEditForm(id, id_barang, nama_barang, tanggal, jumlah) {
+        itemForm.reset();
+        modalTitle.textContent = 'Edit Data Barang';
+        itemForm.action = "{{ url_for('edit_item', id=0) }}".replace('0', id);
+        
+        document.getElementById('itemId').value = id;
+        document.getElementById('id_barang').value = id_barang;
+        document.getElementById('nama_barang').value = nama_barang;
+        document.getElementById('tanggal').value = tanggal;
+        document.getElementById('jumlah').value = jumlah;
+    }
+
+    const deleteForm = document.getElementById('deleteForm');
+
+    function prepareDelete(id) {
+        deleteForm.action = "{{ url_for('delete_item', id=0) }}".replace('0', id);
+    }
+</script>
+{% endblock %}
