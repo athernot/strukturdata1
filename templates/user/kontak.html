@@ -1,190 +1,277 @@
 {% extends 'user/layout.html' %}
 {% block isi %}
 <style>
-    .contact-card {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        border: 1px solid rgba(255,255,255,0.08);
-        background: rgba(44, 62, 80, 0.85); /* Glass effect, sesuai tema */
-        color: #f8f9fa;
-        border-radius: 15px;
+    /* Latar belakang utama dan animasi header */
+    .contact-page-bg {
+        background: linear-gradient(135deg, #1f2023 0%, #2c3e50 100%);
+        padding: 5rem 0;
+        min-height: 100vh;
+    }
+    .contact-header h1, .contact-header p {
+        animation: fadeInDown 1s ease-out;
+    }
+    @keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-30px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 
+    /* Penampung untuk efek 3D */
+    .contact-grid {
+        perspective: 1500px;
+    }
+    
+    /* Animasi masuk untuk setiap item kartu */
+    .contact-item {
+        opacity: 0;
+        transform: translateY(50px);
+        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+    .contact-item.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Desain Kartu Kontak 3D Interaktif */
+    .contact-card {
+        position: relative;
+        transform-style: preserve-3d;
+        background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0));
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        transition: transform 0.1s linear, box-shadow 0.4s ease;
+        /* overflow: hidden; -- DIHAPUS untuk mencegah pemotongan */
+    }
     .contact-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 10px 30px rgba(13, 110, 253, 0.18) !important;
-        background: rgba(44, 62, 80, 0.95);
-        border-color: #0d6efd;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        border-color: rgba(13, 110, 253, 0.5);
+    }
+
+    /* Efek cahaya/kilau saat hover */
+    .contact-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at var(--x) var(--y), rgba(13, 110, 253, 0.3), transparent 30%);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+        pointer-events: none;
+        border-radius: 20px; /* Pastikan efek cahaya mengikuti border-radius */
+    }
+    .contact-card:hover::before {
+        opacity: 1;
     }
 
     .contact-card .card-body {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
+        transform: translateZ(20px); /* Mendorong konten sedikit ke depan */
+        padding: 1.5rem;
+        padding-top: 0;
     }
 
+    /* Foto profil dengan efek 3D */
     .contact-card img {
         width: 120px;
         height: 120px;
         border-radius: 50%;
         object-fit: cover;
-        border: 4px solid #0d6efd; /* Biru utama */
-        box-shadow: 0 4px 16px rgba(13, 110, 253, 0.12);
-        margin-top: -60px;
+        border: 4px solid #0d6efd;
+        box-shadow: 0 5px 20px rgba(13, 110, 253, 0.2);
         background: #1f2023;
+        transform: translateZ(50px); /* Mendorong foto lebih ke depan */
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        margin-top: -60px; /* Menarik gambar ke atas */
+        margin-bottom: 1.2rem; /* Memberi jarak ke judul di bawahnya */
+    }
+    .contact-card:hover img {
+        transform: translateZ(50px) scale(1.08);
     }
 
-    .contact-card .card-title,
-    .contact-card .card-text a,
-    .contact-card .card-text {
-        color: #fff !important;
-    }
+    .contact-card .card-title { color: #fff; }
+    .contact-card .card-text a { color: #fff; transition: color 0.3s; }
+    .contact-card .card-text a:hover { color: #0d6efd; }
+    .contact-card .text-muted { color: #b0b8c1 !important; }
 
-    .contact-card .text-muted {
-        color: #b0b8c1 !important;
-    }
-
+    /* Ikon sosial dengan efek interaktif */
     .contact-card .social-icons a {
         color: #b0b8c1;
         margin: 0 10px;
         font-size: 1.3rem;
-        transition: color 0.3s, text-shadow 0.3s;
+        transition: all 0.3s ease;
     }
-
     .contact-card .social-icons a:hover {
         color: #0d6efd;
-        text-shadow: 0 0 10px #0d6efd;
-    }
-
-    /* Responsive: background tetap gelap di mobile */
-    @media (max-width: 991.98px) {
-        .contact-card {
-            background: rgba(44, 62, 80, 0.98);
-        }
+        transform: translateY(-3px) scale(1.1);
+        text-shadow: 0 0 15px rgba(13, 110, 253, 0.8);
     }
 </style>
 
-<div class="container my-5 py-5">
-    <div class="text-center mb-5">
-        <h1 class="fw-bold text-white">KONTAK SUPPORT KAMI</h1>
-        <p class="lead" style="color: #e0e0e0;">Siap membantu Anda kapan saja.</p>
-    </div>
-
-    <div class="row g-4 justify-content-center">
-        <div class="col-lg-4 col-md-6">
-            <div class="card contact-card shadow-sm h-100">
-                <div class="card-body pt-0">
-                    <img src="https://img.freepik.com/free-photo/man-with-arms-crossed_1187-1760.jpg?semt=ais_hybrid&w=740" alt="John Doe">
-                    <h4 class="card-title fw-bold mt-3">John Doe</h4>
-                    <p class="text-muted">Customer Support Lead</p>
-                    <p class="card-text small">
-                        <i class="fas fa-envelope me-2"></i><a href="mailto:johndoe@example.com" class="text-decoration-none text-dark">johndoe@example.com</a><br>
-                        <i class="fas fa-phone me-2"></i><a href="tel:+6281234567890" class="text-decoration-none text-dark">+62 812 3456 7890</a>
-                    </p>
-                    <div class="social-icons mt-3">
-                        <a href="#"><i class="fab fa-linkedin"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-whatsapp"></i></a>
-                    </div>
-                </div>
-            </div>
+<div class="contact-page-bg">
+    <div class="container my-5 py-5">
+        <div class="text-center mb-5 contact-header">
+            <h1 class="display-4 fw-bold text-white">Hubungi Tim Kami</h1>
+            <p class="lead" style="color: #e0e0e0;">Kami di sini untuk menjawab setiap pertanyaan Anda.</p>
         </div>
 
-        <div class="col-lg-4 col-md-6">
-            <div class="card contact-card shadow-sm h-100">
-                <div class="card-body pt-0">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQFX27ddOT1sCsZjjjLVxZzOrB-6vr9VCcVnQ&s" alt="Alice Smith">
-                    <h4 class="card-title fw-bold mt-3">Alice Smith</h4>
-                    <p class="text-muted">Technical Support</p>
-                    <p class="card-text small">
-                        <i class="fas fa-envelope me-2"></i><a href="mailto:alicesmith@example.com" class="text-decoration-none text-dark">alicesmith@example.com</a><br>
-                        <i class="fas fa-phone me-2"></i><a href="tel:+6281298765432" class="text-decoration-none text-dark">+62 812 9876 5432</a>
-                    </p>
-                    <div class="social-icons mt-3">
-                        <a href="#"><i class="fab fa-linkedin"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-whatsapp"></i></a>
+        <div class="row g-5 justify-content-center contact-grid">
+            <div class="col-lg-4 col-md-6 contact-item">
+                <div class="card contact-card h-100">
+                    <div class="card-body text-center">
+                        <img src="https://img.freepik.com/free-photo/man-with-arms-crossed_1187-1760.jpg?semt=ais_hybrid&w=740" alt="John Doe">
+                        <h4 class="card-title fw-bold">John Doe</h4>
+                        <p class="text-muted">Customer Support Lead</p>
+                        <p class="card-text small mt-3">
+                            <i class="fas fa-envelope me-2"></i><a href="mailto:johndoe@example.com" class="text-decoration-none">johndoe@example.com</a><br>
+                            <i class="fas fa-phone me-2 mt-2"></i><a href="tel:+6281234567890" class="text-decoration-none">+62 812 3456 7890</a>
+                        </p>
+                        <div class="social-icons mt-4">
+                            <a href="#"><i class="fab fa-linkedin"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fab fa-whatsapp"></i></a>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="col-lg-4 col-md-6">
-            <div class="card contact-card shadow-sm h-100">
-                <div class="card-body pt-0">
-                    <img src="https://img.freepik.com/free-photo/portrait-young-businessman-with-arms-crossed-looking-camera-isolated-against-white-background_23-2148073336.jpg?semt=ais_hybrid&w=740" alt="Bob Johnson">
-                    <h4 class="card-title fw-bold mt-3">Bob Johnson</h4>
-                    <p class="text-muted">Senior Support</p>
-                    <p class="card-text small">
-                        <i class="fas fa-envelope me-2"></i><a href="mailto:bobjohnson@example.com" class="text-decoration-none text-dark">bobjohnson@example.com</a><br>
-                        <i class="fas fa-phone me-2"></i><a href="tel:+6281312345678" class="text-decoration-none text-dark">+62 813 1234 5678</a>
-                    </p>
-                    <div class="social-icons mt-3">
-                        <a href="#"><i class="fab fa-linkedin"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-whatsapp"></i></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-lg-4 col-md-6">
-            <div class="card contact-card shadow-sm h-100">
-                <div class="card-body pt-0">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQN1YKvw43UsqylfY5EomJe1PwfF-wZIjwvZA&s" alt="Emma Wilson">
-                    <h4 class="card-title fw-bold mt-3">Emma Wilson</h4>
-                    <p class="text-muted">Product Specialist</p>
-                    <p class="card-text small">
-                        <i class="fas fa-envelope me-2"></i><a href="mailto:emmawilson@example.com" class="text-decoration-none text-dark">emmawilson@example.com</a><br>
-                        <i class="fas fa-phone me-2"></i><a href="tel:+6281923456789" class="text-decoration-none text-dark">+62 819 2345 6789</a>
-                    </p>
-                    <div class="social-icons mt-3">
-                        <a href="#"><i class="fab fa-linkedin"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-whatsapp"></i></a>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <div class="col-lg-4 col-md-6">
-            <div class="card contact-card shadow-sm h-100">
-                <div class="card-body pt-0">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTrOhsUquplqB6_JwyVmltT7RypUNcTs3pLIQ&s" alt="Charlie Brown">
-                    <h4 class="card-title fw-bold mt-3">Charlie Brown</h4>
-                    <p class="text-muted">Technical Support</p>
-                     <p class="card-text small">
-                        <i class="fas fa-envelope me-2"></i><a href="mailto:charliebrown@example.com" class="text-decoration-none text-dark">charliebrown@example.com</a><br>
-                        <i class="fas fa-phone me-2"></i><a href="tel:+6281745678901" class="text-decoration-none text-dark">+62 817 4567 8901</a>
-                    </p>
-                    <div class="social-icons mt-3">
-                        <a href="#"><i class="fab fa-linkedin"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-whatsapp"></i></a>
+            <div class="col-lg-4 col-md-6 contact-item">
+                <div class="card contact-card h-100">
+                    <div class="card-body text-center">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQFX27ddOT1sCsZjjjLVxZzOrB-6vr9VCcVnQ&s" alt="Alice Smith">
+                        <h4 class="card-title fw-bold">Alice Smith</h4>
+                        <p class="text-muted">Technical Support</p>
+                        <p class="card-text small mt-3">
+                            <i class="fas fa-envelope me-2"></i><a href="mailto:alicesmith@example.com" class="text-decoration-none">alicesmith@example.com</a><br>
+                            <i class="fas fa-phone me-2 mt-2"></i><a href="tel:+6281298765432" class="text-decoration-none">+62 812 9876 5432</a>
+                        </p>
+                        <div class="social-icons mt-4">
+                            <a href="#"><i class="fab fa-linkedin"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fab fa-whatsapp"></i></a>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="col-lg-4 col-md-6">
-            <div class="card contact-card shadow-sm h-100">
-                <div class="card-body pt-0">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSizh-kPGJWYr6z9Xp00p1iKfAS8gfWRQyA7iXHiATcer3mVWyYG6Sqib646MJrD3KvMxo&usqp=CAU" alt="Diana Prince">
-                    <h4 class="card-title fw-bold mt-3">Diana Prince</h4>
-                    <p class="text-muted">Client Relations</p>
-                    <p class="card-text small">
-                        <i class="fas fa-envelope me-2"></i><a href="mailto:dianaprince@example.com" class="text-decoration-none text-dark">dianaprince@example.com</a><br>
-                        <i class="fas fa-phone me-2"></i><a href="tel:+6281678901234" class="text-decoration-none text-dark">+62 816 7890 1234</a>
-                    </p>
-                    <div class="social-icons mt-3">
-                        <a href="#"><i class="fab fa-linkedin"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-whatsapp"></i></a>
+            
+            <div class="col-lg-4 col-md-6 contact-item">
+                <div class="card contact-card h-100">
+                    <div class="card-body text-center">
+                        <img src="https://img.freepik.com/free-photo/portrait-young-businessman-with-arms-crossed-looking-camera-isolated-against-white-background_23-2148073336.jpg?semt=ais_hybrid&w=740" alt="Bob Johnson">
+                        <h4 class="card-title fw-bold">Bob Johnson</h4>
+                        <p class="text-muted">Senior Support</p>
+                        <p class="card-text small mt-3">
+                            <i class="fas fa-envelope me-2"></i><a href="mailto:bobjohnson@example.com" class="text-decoration-none">bobjohnson@example.com</a><br>
+                            <i class="fas fa-phone me-2 mt-2"></i><a href="tel:+6281312345678" class="text-decoration-none">+62 813 1234 5678</a>
+                        </p>
+                        <div class="social-icons mt-4">
+                            <a href="#"><i class="fab fa-linkedin"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fab fa-whatsapp"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 contact-item">
+                <div class="card contact-card h-100">
+                    <div class="card-body text-center">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQN1YKvw43UsqylfY5EomJe1PwfF-wZIjwvZA&s" alt="Emma Wilson">
+                        <h4 class="card-title fw-bold">Emma Wilson</h4>
+                        <p class="text-muted">Product Specialist</p>
+                        <p class="card-text small mt-3">
+                            <i class="fas fa-envelope me-2"></i><a href="mailto:emmawilson@example.com" class="text-decoration-none">emmawilson@example.com</a><br>
+                            <i class="fas fa-phone me-2 mt-2"></i><a href="tel:+6281923456789" class="text-decoration-none">+62 819 2345 6789</a>
+                        </p>
+                        <div class="social-icons mt-4">
+                            <a href="#"><i class="fab fa-linkedin"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fab fa-whatsapp"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6 contact-item">
+                <div class="card contact-card h-100">
+                    <div class="card-body text-center">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTrOhsUquplqB6_JwyVmltT7RypUNcTs3pLIQ&s" alt="Charlie Brown">
+                        <h4 class="card-title fw-bold">Charlie Brown</h4>
+                        <p class="text-muted">Technical Support</p>
+                         <p class="card-text small mt-3">
+                            <i class="fas fa-envelope me-2"></i><a href="mailto:charliebrown@example.com" class="text-decoration-none">charliebrown@example.com</a><br>
+                            <i class="fas fa-phone me-2 mt-2"></i><a href="tel:+6281745678901" class="text-decoration-none">+62 817 4567 8901</a>
+                        </p>
+                        <div class="social-icons mt-4">
+                            <a href="#"><i class="fab fa-linkedin"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fab fa-whatsapp"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 contact-item">
+                <div class="card contact-card h-100">
+                    <div class="card-body text-center">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSizh-kPGJWYr6z9Xp00p1iKfAS8gfWRQyA7iXHiATcer3mVWyYG6Sqib646MJrD3KvMxo&usqp=CAU" alt="Diana Prince">
+                        <h4 class="card-title fw-bold">Diana Prince</h4>
+                        <p class="text-muted">Client Relations</p>
+                        <p class="card-text small mt-3">
+                            <i class="fas fa-envelope me-2"></i><a href="mailto:dianaprince@example.com" class="text-decoration-none">dianaprince@example.com</a><br>
+                            <i class="fas fa-phone me-2 mt-2"></i><a href="tel:+6281678901234" class="text-decoration-none">+62 816 7890 1234</a>
+                        </p>
+                        <div class="social-icons mt-4">
+                            <a href="#"><i class="fab fa-linkedin"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fab fa-whatsapp"></i></a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Animasi masuk saat scroll
+    const contactItems = document.querySelectorAll('.contact-item');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    contactItems.forEach((item, index) => {
+        item.style.transitionDelay = `${index * 100}ms`;
+        observer.observe(item);
+    });
+
+    // 2. Efek 3D Tilt dan Efek Cahaya pada kartu
+    const cards = document.querySelectorAll('.contact-card');
+    cards.forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const { width, height } = rect;
+            const rotateX = (y / height - 0.5) * -25; // Mengatur intensitas rotasi
+            const rotateY = (x / width - 0.5) * 25;
+
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            card.style.setProperty('--x', `${x}px`);
+            card.style.setProperty('--y', `${y}px`);
+        });
+
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+        });
+    });
+});
+</script>
 
 {% endblock %}
