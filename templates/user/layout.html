@@ -40,19 +40,63 @@
             scroll-behavior: smooth;
         }
 
-        /* Enhanced Navbar Styles */
+        .background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+            background: linear-gradient(125deg, #667eea, #764ba2, #f093fb, #f5576c);
+            background-size: 400% 400%;
+            animation: gerakBackground 20s ease infinite;
+        }
+
+        @keyframes gerakBackground {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .light-orb {
+            position: absolute;
+            display: block;
+            list-style: none;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            bottom: -150px;
+            animation: animasiBentuk 25s linear infinite;
+        }
+
+        .light-orb:nth-child(1) { left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
+        .light-orb:nth-child(2) { left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; }
+        .light-orb:nth-child(3) { left: 70%; width: 20px; height: 20px; animation-delay: 4s; }
+        .light-orb:nth-child(4) { left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s; }
+        .light-orb:nth-child(5) { left: 65%; width: 20px; height: 20px; animation-delay: 0s; }
+        .light-orb:nth-child(6) { left: 75%; width: 110px; height: 110px; animation-delay: 3s; }
+        .light-orb:nth-child(7) { left: 35%; width: 150px; height: 150px; animation-delay: 7s; }
+        .light-orb:nth-child(8) { left: 50%; width: 25px; height: 25px; animation-delay: 15s; animation-duration: 45s; }
+        .light-orb:nth-child(9) { left: 20%; width: 15px; height: 15px; animation-delay: 2s; animation-duration: 35s; }
+        .light-orb:nth-child(10) { left: 85%; width: 150px; height: 150px; animation-delay: 0s; animation-duration: 11s; }
+
+        @keyframes animasiBentuk {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-120vh) rotate(720deg); opacity: 0; }
+        }
+
         .navbar-enhanced {
-            background: var(--white) !important;
-            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.8) !important;
+            backdrop-filter: blur(15px);
             box-shadow: 0 8px 32px var(--shadow-light);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             padding: 0.8rem 0;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: fixed;
             top: 0;
             width: 100%;
             z-index: 1000;
-            /* PENTING: Menghilangkan margin bottom */
             margin-bottom: 0 !important;
         }
 
@@ -62,7 +106,6 @@
             padding: 0.5rem 0;
         }
 
-        /* Brand Styling */
         .navbar-brand-enhanced {
             font-weight: 700 !important;
             font-size: 2rem !important;
@@ -87,15 +130,9 @@
             border-radius: 2px;
         }
 
-        .navbar-brand-enhanced:hover::after {
-            width: 100%;
-        }
+        .navbar-brand-enhanced:hover::after { width: 100%; }
+        .navbar-brand-enhanced:hover { transform: translateY(-2px); }
 
-        .navbar-brand-enhanced:hover {
-            transform: translateY(-2px);
-        }
-
-        /* Navigation Links */
         .navbar-nav-enhanced .nav-link {
             color: var(--text-color) !important;
             font-weight: 500;
@@ -106,6 +143,8 @@
             position: relative;
             overflow: hidden;
             text-decoration: none;
+            display: flex; /* Untuk mensejajarkan ikon dan teks */
+            align-items: center;
         }
 
         .navbar-nav-enhanced .nav-link::before {
@@ -121,9 +160,7 @@
             border-radius: 25px;
         }
 
-        .navbar-nav-enhanced .nav-link:hover::before {
-            left: 0;
-        }
+        .navbar-nav-enhanced .nav-link:hover::before { left: 0; }
 
         .navbar-nav-enhanced .nav-link:hover {
             color: white !important;
@@ -137,33 +174,25 @@
             box-shadow: 0 4px 15px var(--shadow-medium);
         }
 
-        /* Admin Button Special Styling */
-        .admin-btn {
-            background: var(--gradient-secondary) !important;
+        .nav-icon {
+            margin-right: 0.7rem; /* Memberi jarak antara ikon dan teks */
+        }
+
+        .admin-btn, .dashboard-btn {
             color: white !important;
             border-radius: 25px !important;
             padding: 0.7rem 1.5rem !important;
             font-weight: 600;
             transition: all 0.3s ease;
             border: none;
-            position: relative;
-            overflow: hidden;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
-
-        .admin-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
-            transition: left 0.3s ease;
-            z-index: -1;
-        }
-
-        .admin-btn:hover::before {
-            left: 0;
+        
+        .admin-btn {
+            background: var(--gradient-secondary) !important;
         }
 
         .admin-btn:hover {
@@ -171,8 +200,20 @@
             box-shadow: 0 10px 30px rgba(238, 90, 82, 0.4);
             color: white !important;
         }
+        
+        /* --- STYLE BARU UNTUK TOMBOL DASHBOARD --- */
+        .dashboard-btn {
+            background: var(--gradient-primary) !important;
+        }
 
-        /* Mobile Menu Styling */
+        .dashboard-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            color: white !important;
+        }
+        /* --- AKHIR STYLE BARU --- */
+
+
         .navbar-toggler-enhanced {
             border: none !important;
             padding: 0.5rem;
@@ -180,48 +221,29 @@
             transition: all 0.3s ease;
         }
 
-        .navbar-toggler-enhanced:focus {
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-        }
+        .navbar-toggler-enhanced:focus { box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2); }
 
         .navbar-toggler-enhanced .navbar-toggler-icon {
-            background-image: none;
-            width: 24px;
-            height: 2px;
-            background: var(--text-color);
-            border-radius: 2px;
+            background-image: none; width: 24px; height: 2px;
+            background: var(--text-color); border-radius: 2px;
             transition: all 0.3s ease;
         }
 
         .navbar-toggler-enhanced .navbar-toggler-icon::before,
         .navbar-toggler-enhanced .navbar-toggler-icon::after {
-            content: '';
-            position: absolute;
-            width: 24px;
-            height: 2px;
-            background: var(--text-color);
-            border-radius: 2px;
-            transition: all 0.3s ease;
+            content: ''; position: absolute; width: 24px;
+            height: 2px; background: var(--text-color);
+            border-radius: 2px; transition: all 0.3s ease;
         }
 
-        .navbar-toggler-enhanced .navbar-toggler-icon::before {
-            top: -8px;
-        }
+        .navbar-toggler-enhanced .navbar-toggler-icon::before { top: -8px; }
+        .navbar-toggler-enhanced .navbar-toggler-icon::after { top: 8px; }
 
-        .navbar-toggler-enhanced .navbar-toggler-icon::after {
-            top: 8px;
-        }
-
-        /* SOLUSI UTAMA: Content Area tanpa gap */
         .content-area {
-            /* Menghitung tinggi navbar dan menghilangkan gap */
-            margin-top: 0;
-            padding-top: 80px; /* Sesuaikan dengan tinggi navbar */
+            padding-top: 80px;
             min-height: 100vh;
-            background: linear-gradient(135deg, #1f2023 0%, #2c3e50 100%);
         }
 
-        /* Responsive Design */
         @media (max-width: 991.98px) {
             .navbar-nav-enhanced {
                 background: rgba(255, 255, 255, 0.95);
@@ -231,86 +253,34 @@
                 padding: 1rem;
                 box-shadow: 0 8px 32px var(--shadow-light);
             }
-
-            .navbar-nav-enhanced .nav-link {
-                margin: 0.3rem 0;
-                text-align: center;
+            .navbar-nav-enhanced .nav-link { margin: 0.3rem 0; text-align: center; }
+            .admin-btn, .dashboard-btn { margin-top: 0.5rem; display: block; width: 100%; }
+            .content-area { padding-top: 70px; }
+            /* Mengatur jarak di mobile */
+            .navbar-nav > .nav-item:not(:last-child) {
+                margin-right: 0 !important;
+                margin-bottom: 0.5rem;
             }
-
-            .admin-btn {
-                margin-top: 0.5rem;
-                text-align: center;
-                display: block;
-            }
-
-            .content-area {
-                padding-top: 70px; /* Navbar lebih kecil di mobile */
-            }
-        }
-
-        /* Loading Animation */
-        .navbar-enhanced::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: var(--gradient-primary);
-            transform: scaleX(0);
-            transform-origin: left;
-            animation: navbarLoad 2s ease-in-out;
-        }
-
-        @keyframes navbarLoad {
-            0% { transform: scaleX(0); }
-            50% { transform: scaleX(0.5); }
-            100% { transform: scaleX(1); }
-        }
-
-        /* Icon Enhancements */
-        .nav-icon {
-            margin-right: 0.5rem;
-            transition: transform 0.3s ease;
-        }
-
-        .navbar-nav-enhanced .nav-link:hover .nav-icon {
-            transform: rotate(5deg) scale(1.1);
-        }
-
-        /* Ripple Effect */
-        .ripple {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.6);
-            transform: scale(0);
-            animation: ripple-animation 0.6s linear;
-            pointer-events: none;
-        }
-
-        @keyframes ripple-animation {
-            to {
-                transform: scale(4);
-                opacity: 0;
-            }
-        }
-
-        /* SOLUSI TAMBAHAN: Menghilangkan default Bootstrap margins */
-        .container-fluid {
-            padding-left: 1rem;
-            padding-right: 1rem;
-        }
-
-        /* Pastikan tidak ada space extra */
-        .navbar > .container-fluid {
-            margin-bottom: 0;
-            padding-bottom: 0;
-        
         }
     </style>
 </head>
 
 <body>
+    
+    <div class="background-container">
+       <ul class="light-orbs">
+          <li class="light-orb"></li>
+          <li class="light-orb"></li>
+          <li class="light-orb"></li>
+          <li class="light-orb"></li>
+          <li class="light-orb"></li>
+          <li class="light-orb"></li>
+          <li class="light-orb"></li>
+          <li class="light-orb"></li>
+          <li class="light-orb"></li>
+          <li class="light-orb"></li>
+       </ul>
+    </div>
     
     <nav class="navbar navbar-expand-lg navbar-enhanced" id="mainNavbar">
         <div class="container-fluid px-4">
@@ -325,7 +295,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav navbar-nav-enhanced me-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" href="/">
+                        <a class="nav-link" href="/">
                             <i class="fas fa-home nav-icon"></i>Home
                         </a>
                     </li>
@@ -341,41 +311,40 @@
                     </li>
                 </ul>
 
-                <ul class="navbar-nav ms-auto">
-    {% if 'user_id' in session %}
-        {% if session.user_role == 'admin' %}
-        <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('admin_home') }}">
-                <i class="fas fa-tachometer-alt nav-icon"></i> Dashboard
-            </a>
-        </li>
-        {% endif %}
-        <li class="nav-item">
-            <a class="nav-link admin-btn" href="{{ url_for('logout') }}">
-                <i class="fas fa-sign-out-alt nav-icon"></i> Logout
-            </a>
-        </li>
-    {% else %}
-        <li class="nav-item">
-            <a class="nav-link admin-btn" href="{{ url_for('login') }}">
-                <i class="fas fa-user-shield nav-icon"></i> Login / Register
-            </a>
-        </li>
-    {% endif %}
-</ul>
+                <ul class="navbar-nav ms-auto d-flex flex-row align-items-center">
+                    {% if 'user_id' in session %}
+                        {% if session.user_role == 'admin' %}
+                        <li class="nav-item me-2">
+                            <a class="dashboard-btn" href="{{ url_for('admin_home') }}">
+                                <i class="fas fa-tachometer-alt nav-icon"></i> Dashboard
+                            </a>
+                        </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="admin-btn" href="{{ url_for('logout') }}">
+                                <i class="fas fa-sign-out-alt nav-icon"></i> Logout
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="admin-btn" href="{{ url_for('login') }}">
+                                <i class="fas fa-user-shield nav-icon"></i> Login / Register
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
             </div>
         </div>
     </nav>
 
-    <div class="content-area">
+    <main class="content-area">
         {% block isi %}
         {% endblock %}
-    </div>
+    </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
     
     <script>
-        // Navbar scroll effect
         window.addEventListener('scroll', function() {
             const navbar = document.getElementById('mainNavbar');
             if (window.scrollY > 50) {
@@ -385,51 +354,23 @@
             }
         });
 
-        // Active link management
         document.addEventListener('DOMContentLoaded', function() {
             const currentPage = window.location.pathname;
             const navLinks = document.querySelectorAll('.navbar-nav-enhanced .nav-link');
-            let isHome = true;
             
             navLinks.forEach(link => {
-                const linkPath = link.getAttribute('href');
-                if (linkPath !== '/' && currentPage.startsWith(linkPath)) {
-                    navLinks.forEach(l => l.classList.remove('active'));
+                link.classList.remove('active');
+                if (link.getAttribute('href') === currentPage) {
                     link.classList.add('active');
-                    isHome = false;
                 }
             });
 
-            if (isHome) {
-                 navLinks.forEach(l => l.classList.remove('active'));
-                 document.querySelector('.navbar-nav-enhanced .nav-link[href="/"]').classList.add('active');
+            if (currentPage === '/') {
+                const homeLink = document.querySelector('.navbar-nav-enhanced .nav-link[href="/"]');
+                if (homeLink) homeLink.classList.add('active');
             }
         });
 
-        // Add ripple effect to nav links
-        document.querySelectorAll('.navbar-nav-enhanced .nav-link').forEach(link => {
-            link.addEventListener('click', function(e) {
-                const ripple = document.createElement('span');
-                const rect = this.getBoundingClientRect();
-                const size = Math.max(rect.width, rect.height);
-                const x = e.clientX - rect.left - size / 2;
-                const y = e.clientY - rect.top - size / 2;
-                
-                ripple.style.width = ripple.style.height = size + 'px';
-                ripple.style.left = x + 'px';
-                ripple.style.top = y + 'px';
-                ripple.classList.add('ripple');
-                
-                // Don't append if it's just for show, let the link navigate
-                // this.appendChild(ripple);
-                
-                // setTimeout(() => {
-                //     ripple.remove();
-                // }, 600);
-            });
-        });
-
-        // Mobile menu auto-close
         document.querySelectorAll('.navbar-nav .nav-link').forEach(link => {
             link.addEventListener('click', () => {
                 const navbarCollapse = document.querySelector('.navbar-collapse');
