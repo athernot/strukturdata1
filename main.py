@@ -90,14 +90,14 @@ def logout():
 # --- RUTE HALAMAN PENGGUNA (UMUM) ---
 @app.route('/')
 def index():
-    conn = get_db_connection()
-    items = conn.execute('SELECT * FROM gudang ORDER BY tanggal DESC LIMIT 6').fetchall()
-    conn.close()
-    return render_template('user/index.html', items=items)
+    return render_template('user/index.html')
 
-@app.route('/tentang')
-def tentang():
-    return render_template('user/tentang.html')
+@app.route('/katalog')
+def katalog():
+    conn = get_db_connection()
+    items = conn.execute('SELECT * FROM gudang ORDER BY tanggal DESC').fetchall()
+    conn.close()
+    return render_template('user/katalog.html', items=items)
 
 @app.route('/kontak')
 def kontak():
