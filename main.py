@@ -8,22 +8,17 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 # --- KONFIGURASI APLIKASI ---
 app = Flask(__name__)
-# Kunci rahasia diperlukan untuk sesi dan pesan flash.
-# Ganti dengan kunci yang lebih aman di lingkungan produksi.
 app.secret_key = 'super_secret_key_that_should_be_changed'
-
-# Lokasi database
 DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'gudang.db')
 
 def get_db_connection():
     """Membuat koneksi ke database SQLite."""
     conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row  # Memungkinkan akses kolom berdasarkan nama
+    conn.row_factory = sqlite3.Row
     return conn
 
 # --- DECORATOR OTENTIKASI ---
 def login_required(f):
-    """Decorator untuk memastikan user sudah login."""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
@@ -33,13 +28,12 @@ def login_required(f):
     return decorated_function
 
 def admin_required(f):
-    """Decorator untuk memastikan user adalah admin."""
     @wraps(f)
-    @login_required  # Admin juga harus login
+    @login_required
     def decorated_function(*args, **kwargs):
         if session.get('user_role') != 'admin':
             flash('Hanya admin yang dapat mengakses halaman ini.', 'danger')
-            return redirect(url_for('admin_home'))  # Arahkan ke dashboard admin
+            return redirect(url_for('admin_home'))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -49,25 +43,21 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        
         conn = get_db_connection()
         user = conn.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
         conn.close()
-        
         if user and check_password_hash(user['password'], password):
             session.clear()
             session['user_id'] = user['id']
             session['username'] = user['username']
             session['user_role'] = user['role']
             flash(f"Selamat datang kembali, {user['username']}!", 'success')
-            
             if user['role'] == 'admin':
                 return redirect(url_for('admin_home'))
             else:
-                return redirect(url_for('index')) # Arahkan user biasa
+                return redirect(url_for('index'))
         else:
             flash('Username atau password salah.', 'danger')
-            
     return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -100,7 +90,10 @@ def logout():
 # --- RUTE HALAMAN PENGGUNA (UMUM) ---
 @app.route('/')
 def index():
-    return render_template('user/index.html')
+    conn = get_db_connection()
+    items = conn.execute('SELECT * FROM gudang ORDER BY tanggal DESC LIMIT 6').fetchall()
+    conn.close()
+    return render_template('user/index.html', items=items)
 
 @app.route('/tentang')
 def tentang():
@@ -110,12 +103,10 @@ def tentang():
 def kontak():
     return render_template('user/kontak.html')
 
-# --- RUTE HALAMAN ADMIN (TERLINDUNGI) ---
+# --- RUTE HALAMAN ADMIN ---
 @app.route('/admin/home')
 @login_required
 def admin_home():
-    # Periksa role untuk memastikan hanya admin atau user yang login bisa masuk
-    # Konten halaman bisa disesuaikan berdasarkan role jika perlu
     return render_template('admin/index.html')
 
 @app.route('/admin/kelola-gudang')
@@ -139,11 +130,13 @@ def add_item():
     nama_barang = request.form['nama_barang']
     tanggal = request.form['tanggal']
     jumlah = request.form['jumlah']
+    deskripsi = request.form.get('deskripsi', '') 
+    gambar = request.form.get('gambar', '')
 
     conn = get_db_connection()
     try:
-        conn.execute('INSERT INTO gudang (id_barang, nama_barang, tanggal, jumlah) VALUES (?, ?, ?, ?)',
-                     (id_barang, nama_barang, tanggal, int(jumlah)))
+        conn.execute('INSERT INTO gudang (id_barang, nama_barang, tanggal, jumlah, deskripsi, gambar) VALUES (?, ?, ?, ?, ?, ?)',
+                     (id_barang, nama_barang, tanggal, int(jumlah), deskripsi, gambar))
         conn.commit()
         flash('Barang berhasil ditambahkan!', 'success')
     except sqlite3.IntegrityError:
@@ -152,30 +145,27 @@ def add_item():
         flash('Jumlah harus berupa angka.', 'danger')
     finally:
         conn.close()
-    
     return redirect(url_for('kelola_gudang'))
 
 @app.route('/admin/gudang/edit/<int:id>', methods=['POST'])
 @admin_required
 def edit_item(id):
-    id_barang_form = request.form['id_barang']
     nama_barang_form = request.form['nama_barang']
     tanggal_form = request.form['tanggal']
     jumlah_form = request.form['jumlah']
-    
+    deskripsi_form = request.form.get('deskripsi', '')
+    gambar_form = request.form.get('gambar', '')
+
     conn = get_db_connection()
     try:
-        conn.execute('UPDATE gudang SET id_barang = ?, nama_barang = ?, tanggal = ?, jumlah = ? WHERE id = ?',
-                     (id_barang_form, nama_barang_form, tanggal_form, int(jumlah_form), id))
+        conn.execute('UPDATE gudang SET nama_barang = ?, tanggal = ?, jumlah = ?, deskripsi = ?, gambar = ? WHERE id = ?',
+                     (nama_barang_form, tanggal_form, int(jumlah_form), deskripsi_form, gambar_form, id))
         conn.commit()
         flash('Data barang berhasil diperbarui!', 'info')
-    except sqlite3.IntegrityError:
-        flash(f"ID Barang '{id_barang_form}' sudah digunakan oleh item lain.", 'danger')
     except (ValueError, TypeError):
         flash('Jumlah harus berupa angka.', 'danger')
     finally:
         conn.close()
-
     return redirect(url_for('kelola_gudang'))
 
 @app.route('/admin/gudang/delete/<int:id>', methods=['POST'])
@@ -188,15 +178,53 @@ def delete_item(id):
     flash('Data barang telah dihapus.', 'success')
     return redirect(url_for('kelola_gudang'))
 
+# --- OPERASI LAPORAN (HANYA ADMIN) ---
+@app.route('/admin/laporan/submit', methods=['POST'])
+@admin_required
+def submit_laporan():
+    tipe_laporan = request.form.get('tipe_laporan')
+    judul_laporan = request.form.get('judul_laporan')
+    isi_laporan = request.form.get('isi_laporan')
+    pelapor = session.get('username', 'admin')
+
+    if not all([tipe_laporan, judul_laporan, isi_laporan]):
+        flash('Semua field harus diisi.', 'danger')
+        return redirect(url_for('laporan'))
+
+    conn = get_db_connection()
+    try:
+        conn.execute('INSERT INTO laporan (tipe_laporan, judul_laporan, isi_laporan, pelapor) VALUES (?, ?, ?, ?)',
+                     (tipe_laporan, judul_laporan, isi_laporan, pelapor))
+        conn.commit()
+        flash('Laporan berhasil dikirim!', 'success')
+    except Exception as e:
+        flash(f'Terjadi kesalahan saat mengirim laporan: {e}', 'danger')
+    finally:
+        conn.close()
+    return redirect(url_for('preview_laporan'))
+
+@app.route('/admin/laporan/preview')
+@admin_required
+def preview_laporan():
+    conn = get_db_connection()
+    all_reports = conn.execute('SELECT *, strftime("%d-%m-%Y %H:%M", tanggal_lapor) as tgl_formatted FROM laporan ORDER BY tanggal_lapor DESC').fetchall()
+    conn.close()
+    return render_template('admin/preview.html', reports=all_reports)
+
+@app.route('/admin/laporan/delete/<int:id>', methods=['POST'])
+@admin_required
+def delete_laporan(id):
+    conn = get_db_connection()
+    conn.execute('DELETE FROM laporan WHERE id = ?', (id,))
+    conn.commit()
+    conn.close()
+    flash('Laporan telah dihapus.', 'success')
+    return redirect(url_for('preview_laporan'))
+
 # --- MAIN EXECUTION ---
 if __name__ == '__main__':
-    # Pastikan database ada sebelum aplikasi dijalankan
     if not os.path.exists(DATABASE):
-        print(f"Database tidak ditemukan di '{DATABASE}'.")
-        print("Menjalankan 'init_db.py' untuk membuat database baru...")
-        # Secara otomatis memanggil fungsi inisialisasi jika file tidak ada
+        print(f"Database tidak ditemukan di '{DATABASE}'. Menjalankan 'init_db.py'...")
         import init_db
         init_db.initialize_database()
-    
-    # Menjalankan aplikasi dalam mode debug
     app.run(debug=True)

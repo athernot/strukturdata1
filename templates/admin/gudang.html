@@ -2,6 +2,16 @@
 {% block title %}Kelola Gudang{% endblock %}
 
 {% block isi %}
+<style>
+    .item-image {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+    }
+</style>
+
 <div class="container-fluid px-4">
     <h1 class="mt-4">Kelola Gudang</h1>
     <p class="mb-4">Lihat, tambah, edit, atau hapus data barang yang ada di gudang.</p>
@@ -9,7 +19,7 @@
     <div class="card shadow-sm border-0 rounded-4">
         <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
             <h5 class="mb-0 fw-bold text-secondary">Daftar Barang di Gudang</h5>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#itemModal" onclick="prepareAddForm()">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#itemModal" data-action="add">
                 <i class="fas fa-plus me-2"></i>Tambah Data Baru
             </button>
         </div>
@@ -19,6 +29,7 @@
                     <thead class="table-light">
                         <tr>
                             <th>#</th>
+                            <th>Gambar</th>
                             <th>Nama Barang</th>
                             <th>ID Barang</th>
                             <th>Tanggal Masuk</th>
@@ -30,13 +41,25 @@
                         {% for item in items %}
                         <tr>
                             <td>{{ loop.index }}</td>
+                            <td>
+                                <img src="{{ item.gambar if item.gambar else 'https://via.placeholder.com/60x60.png?text=N/A' }}" alt="{{ item.nama_barang }}" class="item-image">
+                            </td>
                             <td><div class="fw-bold">{{ item.nama_barang }}</div></td>
                             <td><span class="badge bg-secondary">{{ item.id_barang }}</span></td>
                             <td>{{ item.tanggal }}</td>
                             <td>{{ item.jumlah }}</td>
                             <td class="text-center">
-                                <button class="btn btn-sm btn-info text-white" data-bs-toggle="modal" data-bs-target="#itemModal" 
-                                    onclick="prepareEditForm('{{ item.id }}', '{{ item.id_barang }}', '{{ item.nama_barang }}', '{{ item.tanggal }}', '{{ item.jumlah }}')">
+                                <button class="btn btn-sm btn-info text-white" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#itemModal"
+                                    data-action="edit"
+                                    data-id="{{ item.id }}"
+                                    data-id-barang="{{ item.id_barang }}"
+                                    data-nama-barang="{{ item.nama_barang }}"
+                                    data-tanggal="{{ item.tanggal }}"
+                                    data-jumlah="{{ item.jumlah }}"
+                                    data-gambar="{{ item.gambar or '' }}"
+                                    data-deskripsi="{{ item.deskripsi or '' }}">
                                     <i class="fas fa-edit me-1"></i>Edit
                                 </button>
                                 <button class="btn btn-sm btn-danger ms-1" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" 
@@ -47,7 +70,7 @@
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="6" class="text-center text-muted">Belum ada data di gudang.</td>
+                            <td colspan="7" class="text-center text-muted">Belum ada data di gudang.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -74,13 +97,23 @@
                         <label for="nama_barang" class="form-label">Nama Barang</label>
                         <input type="text" class="form-control" id="nama_barang" name="nama_barang" required>
                     </div>
-                    <div class="mb-3">
-                        <label for="tanggal" class="form-label">Tanggal</label>
-                        <input type="date" class="form-control" id="tanggal" name="tanggal" required>
+                     <div class="mb-3">
+                        <label for="deskripsi" class="form-label">Deskripsi</label>
+                        <textarea class="form-control" id="deskripsi" name="deskripsi" rows="3" placeholder="Deskripsi singkat mengenai barang"></textarea>
                     </div>
                     <div class="mb-3">
-                        <label for="jumlah" class="form-label">Jumlah</label>
-                        <input type="number" class="form-control" id="jumlah" name="jumlah" required min="0">
+                        <label for="gambar" class="form-label">URL Gambar</label>
+                        <input type="url" class="form-control" id="gambar" name="gambar" placeholder="https://example.com/image.jpg">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="tanggal" class="form-label">Tanggal</label>
+                            <input type="date" class="form-control" id="tanggal" name="tanggal" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="jumlah" class="form-label">Jumlah</label>
+                            <input type="number" class="form-control" id="jumlah" name="jumlah" required min="0">
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -113,31 +146,52 @@
 </div>
 
 <script>
-    const itemForm = document.getElementById('itemForm');
+    const itemModal = document.getElementById('itemModal');
     const modalTitle = document.getElementById('itemModalLabel');
+    const itemForm = document.getElementById('itemForm');
     const deleteForm = document.getElementById('deleteForm');
 
-    function prepareAddForm() {
-        itemForm.reset();
-        modalTitle.textContent = 'Tambah Data Barang';
-        itemForm.action = "{{ url_for('add_item') }}";
-        document.getElementById('id_barang').readOnly = false;
-    }
+    // Menggunakan event listener modern untuk menangani modal
+    itemModal.addEventListener('show.bs.modal', function (event) {
+        // Mengambil tombol yang memicu modal
+        const button = event.relatedTarget;
+        // Membaca atribut data-action untuk membedakan antara 'tambah' dan 'edit'
+        const action = button.getAttribute('data-action');
 
-    function prepareEditForm(id, id_barang, nama_barang, tanggal, jumlah) {
-        itemForm.reset();
-        modalTitle.textContent = 'Edit Data Barang';
-        // URL di-generate dengan '0' sebagai placeholder dan diganti dengan ID asli
-        itemForm.action = "{{ url_for('edit_item', id=0) }}".replace('0', id);
-        
-        // Isi form dengan data yang ada
-        document.getElementById('id_barang').value = id_barang;
-        document.getElementById('nama_barang').value = nama_barang;
-        document.getElementById('tanggal').value = tanggal;
-        document.getElementById('jumlah').value = jumlah;
-        // ID Barang tidak boleh diubah saat edit untuk menjaga integritas
-        document.getElementById('id_barang').readOnly = true;
-    }
+        if (action === 'edit') {
+            // --- MODE EDIT ---
+            modalTitle.textContent = 'Edit Data Barang';
+
+            // Mengambil semua data dari atribut data-*
+            const id = button.getAttribute('data-id');
+            const id_barang = button.getAttribute('data-id-barang');
+            const nama_barang = button.getAttribute('data-nama-barang');
+            const deskripsi = button.getAttribute('data-deskripsi');
+            const gambar = button.getAttribute('data-gambar');
+            const tanggal = button.getAttribute('data-tanggal');
+            const jumlah = button.getAttribute('data-jumlah');
+
+            // Menetapkan action form untuk edit
+            itemForm.action = "{{ url_for('edit_item', id=0) }}".replace('0', id);
+
+            // Mengisi field form dengan data yang diambil
+            document.getElementById('id_barang').value = id_barang;
+            document.getElementById('nama_barang').value = nama_barang;
+            document.getElementById('deskripsi').value = deskripsi;
+            document.getElementById('gambar').value = gambar;
+            document.getElementById('tanggal').value = tanggal;
+            document.getElementById('jumlah').value = jumlah;
+
+            // Membuat ID Barang tidak bisa diubah saat edit
+            document.getElementById('id_barang').readOnly = true;
+        } else {
+            // --- MODE TAMBAH ---
+            itemForm.reset();
+            modalTitle.textContent = 'Tambah Data Barang';
+            itemForm.action = "{{ url_for('add_item') }}";
+            document.getElementById('id_barang').readOnly = false;
+        }
+    });
 
     function prepareDelete(id) {
         deleteForm.action = "{{ url_for('delete_item', id=0) }}".replace('0', id);

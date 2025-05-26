@@ -1,134 +1,73 @@
 {% extends 'admin/layout.html' %}
+{% block title %}Preview Laporan{% endblock %}
+
 {% block isi %}
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Kelola Gudang</h1>
-    <p class="mb-4">Kelola data barang masuk dan keluar di gudang Anda.</p>
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-4">
+        <h1 class="fw-bold text-dark-emphasis">Daftar Laporan</h1>
+        <a href="{{ url_for('laporan') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Buat Laporan Baru
+        </a>
+    </div>
 
     <div class="card shadow-sm border-0 rounded-4">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
-            <h5 class="mb-0 fw-bold text-secondary">Data Barang Gudang</h5>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#itemModal" onclick="prepareAddForm()">
-                <i class="fas fa-plus me-2"></i>Tambah Data
-            </button>
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0 fw-bold text-secondary">Semua Laporan Masuk</h5>
         </div>
         <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                    <thead class="table-light">
-                        <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">ID Barang</th>
-                            <th scope="col">Nama Barang</th>
-                            <th scope="col">Tanggal</th>
-                            <th scope="col">Jumlah</th>
-                            <th scope="col" class="text-center">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <th scope="row">1</th>
-                            <td>BRG-001</td>
-                            <td>Sepatu Lari Adidas</td>
-                            <td>2024-05-20</td>
-                            <td>100</td>
-                            <td class="text-center">
-                                <button class="btn btn-sm btn-info text-white" data-bs-toggle="modal" data-bs-target="#itemModal" onclick="prepareEditForm('1', 'BRG-001', 'Sepatu Lari Adidas', '2024-05-20', '100')">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-danger ms-1">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row">2</th>
-                            <td>BRG-002</td>
-                            <td>Kaos Polos Katun</td>
-                            <td>2024-05-22</td>
-                            <td>250</td>
-                            <td class="text-center">
-                                <button class="btn btn-sm btn-info text-white" data-bs-toggle="modal" data-bs-target="#itemModal" onclick="prepareEditForm('2', 'BRG-002', 'Kaos Polos Katun', '2024-05-22', '250')">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-danger ms-1">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        </tbody>
-                </table>
-            </div>
+            {% if reports %}
+                <div class="accordion" id="laporanAccordion">
+                    {% for report in reports %}
+                    <div class="accordion-item mb-2 border-0 rounded-3 shadow-sm">
+                        <h2 class="accordion-header" id="heading-{{ report.id }}">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ report.id }}">
+                                <span class="badge me-3 {% if report.tipe_laporan == 'Kinerja' %}bg-primary{% else %}bg-danger{% endif %}">{{ report.tipe_laporan }}</span>
+                                <span class="fw-bold text-dark">{{ report.judul_laporan }}</span>
+                                <small class="ms-auto text-muted pe-3">Oleh: {{ report.pelapor }} - {{ report.tgl_formatted }}</small>
+                            </button>
+                        </h2>
+                        <div id="collapse-{{ report.id }}" class="accordion-collapse collapse" data-bs-parent="#laporanAccordion">
+                            <div class="accordion-body">
+                                <p>{{ report.isi_laporan }}</p>
+                                <hr>
+                                <div class="text-end">
+                                    <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" onclick="prepareDelete('{{ report.id }}')">
+                                        <i class="fas fa-trash-alt me-1"></i> Hapus
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center p-5">
+                    <i class="fas fa-folder-open fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">Belum Ada Laporan</h4>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="itemModal" tabindex="-1" aria-labelledby="itemModalLabel" aria-hidden="true">
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="itemModalLabel">Tambah Data Barang</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="itemForm" method="POST" action="">
-                <div class="modal-body">
-                    <input type="hidden" id="itemId" name="id">
-
-                    <div class="mb-3">
-                        <label for="id_barang" class="form-label">ID Barang</label>
-                        <input type="text" class="form-control" id="id_barang" name="id_barang" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="nama_barang" class="form-label">Nama Barang</label>
-                        <input type="text" class="form-control" id="nama_barang" name="nama_barang" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="tanggal" class="form-label">Tanggal</label>
-                        <input type="date" class="form-control" id="tanggal" name="tanggal" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="jumlah" class="form-label">Jumlah</label>
-                        <input type="number" class="form-control" id="jumlah" name="jumlah" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
+            <div class="modal-header"><h5 class="modal-title">Konfirmasi Hapus</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">Apakah Anda yakin ingin menghapus laporan ini?</div>
+            <div class="modal-footer">
+                <form id="deleteForm" method="POST">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary" id="saveButton">Simpan</button>
-                </div>
-            </form>
+                    <button type="submit" class="btn btn-danger">Ya, Hapus</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    const itemModal = document.getElementById('itemModal');
-    const modalTitle = document.getElementById('itemModalLabel');
-    const itemForm = document.getElementById('itemForm');
-    const saveButton = document.getElementById('saveButton');
-
-    // Fungsi untuk menyiapkan modal untuk MENAMBAH data
-    function prepareAddForm() {
-        itemForm.reset(); // Kosongkan form
-        modalTitle.textContent = 'Tambah Data Barang';
-        saveButton.textContent = 'Simpan';
-        // [DATABASE PREPARATION] Arahkan form ke endpoint 'tambah data'
-        itemForm.action = '/admin/gudang/tambah'; 
-        document.getElementById('itemId').value = '';
-    }
-
-    // Fungsi untuk menyiapkan modal untuk MENGEDIT data
-    function prepareEditForm(id, id_barang, nama_barang, tanggal, jumlah) {
-        itemForm.reset();
-        modalTitle.textContent = 'Edit Data Barang';
-        saveButton.textContent = 'Simpan Perubahan';
-        // [DATABASE PREPARATION] Arahkan form ke endpoint 'edit data' dengan ID
-        itemForm.action = `/admin/gudang/edit/${id}`;
-
-        // Isi form dengan data yang ada
-        document.getElementById('itemId').value = id;
-        document.getElementById('id_barang').value = id_barang;
-        document.getElementById('nama_barang').value = nama_barang;
-        document.getElementById('tanggal').value = tanggal;
-        document.getElementById('jumlah').value = jumlah;
+    function prepareDelete(id) {
+        document.getElementById('deleteForm').action = "{{ url_for('delete_laporan', id=0) }}".replace('0', id);
     }
 </script>
 {% endblock %}

@@ -1,308 +1,80 @@
 {% extends 'user/layout.html' %}
 {% block isi %}
 
-<link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-
 <style>
-    /* Styling Dasar Section */
-    .section-bg {
-        background: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%);
-        min-height: 100vh;
-        padding: 4rem 0;
-        overflow-x: hidden;
-    }
-
-    /* === Hero Section dengan Typing Effect === */
-    .hero-section {
-        text-align: center;
-        padding: 4rem 0;
-        margin-bottom: 2rem;
-    }
-    .hero-section h1 {
-        font-size: 3.5rem;
-        font-weight: 700;
-        color: var(--white);
-        text-shadow: 0 0 20px rgba(44, 62, 80, 0.18);
-        animation: fadeInDown 1s ease-out;
-    }
-    .hero-section .typing-effect {
-        color: #3498db; /* Accent color from layout */
-        border-right: .15em solid #3498db;
-        white-space: nowrap;
-        overflow: hidden;
-    }
-    .hero-section p {
-        color: #bfc9d1;
-        font-size: 1.3rem;
-        max-width: 600px;
-        margin: 1rem auto 0;
-        animation: fadeInUp 1s ease-out 0.5s;
-        animation-fill-mode: backwards;
-    }
-
-    /* === Tombol Filter === */
-    .filter-controls {
-        margin-bottom: 3rem;
-        animation: fadeInUp 1s ease-out 0.8s;
-        animation-fill-mode: backwards;
-    }
-    .filter-btn {
-        background: transparent;
-        border: 1.5px solid #3498db;
-        color: #3498db;
-        padding: 0.6rem 1.8rem;
-        margin: 0.3rem;
-        border-radius: 50px;
-        transition: all 0.3s ease;
-        font-weight: 500;
-    }
-    .filter-btn:hover, .filter-btn.active {
-        background: #3498db;
-        color: var(--white);
-        border-color: #3498db;
-        transform: translateY(-3px);
-        box-shadow: 0 10px 20px rgba(52, 152, 219, 0.18);
-    }
-    
-    /* Styling Kartu Produk Pakaian */
-    .card-container .col-lg-4 {
-        transition: transform 0.4s ease, opacity 0.4s ease;
-    }
-    .card-interactive {
-        background: linear-gradient(145deg, #2c3e50, #1a1a1a);
-        border: 1px solid #404040;
-        border-radius: 15px;
-        box-shadow: 0 8px 32px rgba(44, 62, 80, 0.18);
-        transition: all 0.4s ease;
-        overflow: hidden;
-    }
-    .card-interactive:hover {
-        transform: translateY(-12px) scale(1.03);
-        box-shadow: 0 20px 60px rgba(44, 62, 80, 0.28);
-        border-color: #3498db;
-    }
-    .card-interactive .card-img-top {
-        transition: all 0.4s ease;
-        filter: brightness(0.9);
-        height: 400px;
-        object-fit: cover;
-    }
-    .card-interactive:hover .card-img-top {
-        filter: brightness(1.1);
-        transform: scale(1.05);
-    }
-    .card-interactive .card-body {
-        position: relative; z-index: 2; color: var(--white);
-    }
-    .card-interactive .card-title {
-        color: var(--white); font-weight: 600; font-size: 1.4rem;
-    }
-    .card-interactive .card-text { color: #bfc9d1; line-height: 1.6; }
-    .btn-interactive {
-        background: #3498db; border: none; color: var(--white);
-        padding: 0.7rem 1.8rem; border-radius: 25px; transition: all 0.3s ease;
-        text-decoration: none; display: inline-block; margin-top: 1rem;
-        font-weight: 600;
-    }
-    .btn-interactive:hover {
-        background: #217dbb;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(52, 152, 219, 0.22);
-    }
-
-    /* Styling Modal Dark Theme */
-    .modal-dark .modal-content {
-        background: #1e2530;
-        color: var(--white); border: 1px solid #3498db; border-radius: 15px;
-    }
+    .section-bg { background: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%); min-height: 100vh; padding: 4rem 0; overflow-x: hidden; }
+    .hero-section { text-align: center; padding: 4rem 0; margin-bottom: 2rem; }
+    .hero-section h1 { font-size: 3.5rem; font-weight: 700; color: #fff; animation: fadeInDown 1s ease-out; }
+    .hero-section p { color: #bfc9d1; font-size: 1.3rem; max-width: 600px; margin: 1rem auto 0; animation: fadeInUp 1s ease-out 0.5s; animation-fill-mode: backwards; }
+    .card-interactive { background: linear-gradient(145deg, #2c3e50, #1a1a1a); border: 1px solid #404040; border-radius: 15px; transition: all 0.4s ease; overflow: hidden; display: flex; flex-direction: column; height: 100%; }
+    .card-interactive:hover { transform: translateY(-12px) scale(1.03); box-shadow: 0 20px 60px rgba(44, 62, 80, 0.28); border-color: #3498db; }
+    .card-interactive .card-img-top { height: 400px; object-fit: cover; }
+    .card-interactive .card-body { color: #fff; display: flex; flex-direction: column; flex-grow: 1; }
+    .card-interactive .card-title { font-weight: 600; font-size: 1.4rem; }
+    .card-interactive .card-text { color: #bfc9d1; flex-grow: 1; }
+    .btn-interactive { background: #3498db; border: none; color: #fff; padding: 0.7rem 1.8rem; border-radius: 25px; transition: all 0.3s ease; text-decoration: none; display: inline-block; margin-top: 1rem; font-weight: 600; }
+    .modal-dark .modal-content { background: #1e2530; color: #fff; border: 1px solid #3498db; }
     .modal-dark .modal-header { border-bottom: 1.5px solid #3498db; }
-    .modal-dark .modal-title { color: #3498db; font-weight: 600; }
-    .modal-dark .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
-    .modal-dark .modal-body img { border-radius: 10px; box-shadow: 0 5px 20px rgba(44,62,80,0.22); }
-    .modal-dark .product-details-list {
-        list-style: none; padding-left: 0; color: #bfc9d1;
-    }
     .modal-dark .product-details-list li { margin-bottom: 0.5rem; }
     .modal-dark .product-details-list strong { color: #3498db; }
-
-
-    /* Testimonial Section */
-    .testimonial-section {
-        padding: 5rem 0;
-        background-color: #222b36;
-    }
-    .testimonial-section .swiper-slide {
-        width: 340px;
-        background: #2c3e50;
-        border-radius: 15px;
-        padding: 2rem;
-        text-align: center;
-        border-top: 4px solid #3498db;
-    }
-    .testimonial-section .profile-pic {
-        width: 80px; height: 80px; border-radius: 50%;
-        border: 3px solid #3498db; margin: -70px auto 15px; object-fit: cover;
-    }
-    .testimonial-section .testimonial-text { color: #bfc9d1; font-style: italic; margin-bottom: 1rem; }
-    .testimonial-section .testimonial-author { color: var(--white); font-weight: 600; }
-    .swiper-pagination-bullet-active { background: #3498db !important; }
-    .swiper-slide-active { transform: scale(1.05); }
-
-    /* Back to Top Button */
-    .back-to-top {
-        position: fixed; bottom: 25px; right: 25px; display: none;
-        width: 40px; height: 40px; border-radius: 50%;
-        background: #3498db; color: var(--white);
-        text-align: center; line-height: 40px; font-size: 1.2rem;
-        z-index: 1000; transition: all 0.3s ease;
-    }
-    .back-to-top:hover {
-        background: #217dbb; transform: scale(1.1);
-    }
-    
-    /* Animasi Keyframes */
     @keyframes fadeInDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 
 <div class="section-bg">
     <div class="container">
-        
         <div class="hero-section">
-            <h1>Define Your <span class="typing-effect" id="typing-effect"></span></h1>
+            <h1>Define Your Style</h1>
             <p>Discover Curated Collections Where Style Meets Substance.</p>
         </div>
 
-        <div class="text-center filter-controls">
-            <button class="btn filter-btn active" data-filter="*">All Collections</button>
-            <button class="btn filter-btn" data-filter=".urban">Urban Wear</button>
-            <button class="btn filter-btn" data-filter=".seasonal">Seasonal</button>
-            <button class="btn filter-btn" data-filter=".signature">Signature</button>
-        </div>
-
         <div class="row justify-content-center card-container">
-            <div class="col-lg-4 col-md-6 mb-4 filter-item urban">
-                <div class="card card-interactive">
-                    <img id="img-1" src="https://i.pinimg.com/736x/8a/e8/8c/8ae88c08c0968640523569e51e184c6b.jpg" class="card-img-top" alt="Gravity Hoodie">
-                    <div class="card-body text-center">
-                        <h5 id="title-1" class="card-title">Gravity Hoodie</h5>
-                        <p id="text-1" class="card-text">Heavyweight fleece hoodie perfect for city life. A staple for any modern wardrobe.</p>
-                        <button class="btn btn-interactive" data-bs-toggle="modal" data-bs-target="#productModal" data-card="1">Quick View</button>
+            {% if items %}
+                {% for item in items %}
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card card-interactive">
+                        <img src="{{ item.gambar if item.gambar else 'https://via.placeholder.com/400x400.png?text=No+Image' }}" class="card-img-top" alt="{{ item.nama_barang }}">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">{{ item.nama_barang }}</h5>
+                            <p class="card-text">{{ item.deskripsi if item.deskripsi else 'Deskripsi tidak tersedia.' }}</p>
+                            <button class="btn btn-interactive" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#productModal"
+                                    data-title="{{ item.nama_barang }}"
+                                    data-img="{{ item.gambar if item.gambar else 'https://via.placeholder.com/400x400.png?text=No+Image' }}"
+                                    data-text="{{ item.deskripsi if item.deskripsi else 'Deskripsi tidak tersedia.' }}"
+                                    data-id="{{ item.id_barang }}"
+                                    data-stock="{{ item.jumlah }}">
+                                Quick View
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="col-lg-4 col-md-6 mb-4 filter-item seasonal">
-                <div class="card card-interactive">
-                    <img id="img-2" src="https://i.pinimg.com/736x/fb/19/cf/fb19cf7ba3ebed2bfd505be0bd939188.jpg" class="card-img-top" alt="Azure Knit Sweater">
-                    <div class="card-body text-center">
-                        <h5 id="title-2" class="card-title">Azure Knit Sweater</h5>
-                        <p id="text-2" class="card-text">A soft, breathable knit for breezy evenings. The highlight of our autumn collection.</p>
-                        <button class="btn btn-interactive" data-bs-toggle="modal" data-bs-target="#productModal" data-card="2">Details</button>
-                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12 text-center text-white-50">
+                    <h2>Koleksi Segera Hadir</h2>
                 </div>
-            </div>
-            
-            <div class="col-lg-4 col-md-6 mb-4 filter-item signature">
-                <div class="card card-interactive">
-                    <img id="img-3" src="https://i.pinimg.com/736x/d7/f6/b6/d7f6b6ad83e574db5abadb1d6e9b4330.jpg" class="card-img-top" alt="Nomad Tech Jacket">
-                    <div class="card-body text-center">
-                        <h5 id="title-3" class="card-title">Nomad Tech Jacket</h5>
-                        <p id="text-3" class="card-text">Water-resistant fabric meets sleek design. Our signature piece for the modern explorer.</p>
-                        <button class="btn btn-interactive" data-bs-toggle="modal" data-bs-target="#productModal" data-card="3">Explore</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-4 col-md-6 mb-4 filter-item urban">
-                <div class="card card-interactive">
-                    <img id="img-4" src="https://i.pinimg.com/736x/28/3f/5c/283f5cc0fe1a909b4c83946a20969068.jpg" class="card-img-top" alt="Essential Cargo Pants">
-                    <div class="card-body text-center">
-                        <h5 id="title-4" class="card-title">Essential Cargo Pants</h5>
-                        <p id="text-4" class="card-text">Utility and style combined. Features a relaxed fit with durable cotton twill fabric.</p>
-                        <button class="btn btn-interactive" data-bs-toggle="modal" data-bs-target="#productModal" data-card="4">Quick View</button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-lg-4 col-md-6 mb-4 filter-item signature">
-                <div class="card card-interactive">
-                    <img id="img-5" src="https://i.pinimg.com/736x/25/aa/90/25aa900de36823d755c59d8b6ec71450.jpg" class="card-img-top" alt="Zenith Bomber Jacket">
-                    <div class="card-body text-center">
-                        <h5 id="title-5" class="card-title">Zenith Bomber Jacket</h5>
-                        <p id="text-5" class="card-text">A timeless bomber silhouette, elevated with premium satin fabric and embroidered details.</p>
-                        <button class="btn btn-interactive" data-bs-toggle="modal" data-bs-target="#productModal" data-card="5">Details</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-4 col-md-6 mb-4 filter-item seasonal">
-                <div class="card card-interactive">
-                    <img id="img-6" src="https://i.pinimg.com/736x/e1/05/06/e1050679dc8d8f2723b827d3f9310b5b.jpg" class="card-img-top" alt="Faded Wash Jeans">
-                    <div class="card-body text-center">
-                        <h5 id="title-6" class="card-title">Faded Wash Jeans</h5>
-                        <p id="text-6" class="card-text">Expertly faded for a vintage look. Crafted from soft-stretch denim for all-day comfort.</p>
-                        <button class="btn btn-interactive" data-bs-toggle="modal" data-bs-target="#productModal" data-card="6">Quick View</button>
-                    </div>
-                </div>
-            </div>
+            {% endif %}
         </div>
     </div>
 </div>
 
-<div class="testimonial-section">
-    <div class="container">
-        <div class="text-center mb-5">
-             <h1 style="color: #fff; font-weight: 700;">From Our Community</h1>
-             <p style="color: #adb5bd;">Real reviews from our valued customers.</p>
-        </div>
-        <div class="swiper-container">
-            <div class="swiper-wrapper">
-                <div class="swiper-slide">
-                    <img src="https://randomuser.me/api/portraits/men/32.jpg" class="profile-pic" alt="Client 1">
-                    <p class="testimonial-text">"The Gravity Hoodie is my new favorite. The fabric is incredibly comfortable and the fit is perfect. Worth every penny!"</p>
-                    <h5 class="testimonial-author">Leo K.</h5>
-                </div>
-                <div class="swiper-slide">
-                     <img src="https://randomuser.me/api/portraits/women/44.jpg" class="profile-pic" alt="Client 2">
-                    <p class="testimonial-text">"I absolutely love the knit sweater. It's so stylish and versatile. I've gotten so many compliments on it!"</p>
-                    <h5 class="testimonial-author">Mia S.</h5>
-                </div>
-                <div class="swiper-slide">
-                    <img src="https://randomuser.me/api/portraits/men/46.jpg" class="profile-pic" alt="Client 3">
-                    <p class="testimonial-text">"This brand never disappoints. The Nomad jacket is functional and looks amazing. Top-tier quality."</p>
-                    <h5 class="testimonial-author">Ryan Chen</h5>
-                </div>
-            </div>
-            <div class="swiper-pagination"></div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+<div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg modal-dark">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="productModalLabel">Product Details</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
+      <div class="modal-header"><h5 class="modal-title" id="productModalLabel">Product Details</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
       <div class="modal-body">
         <div class="row">
-          <div class="col-md-6 mb-3 mb-md-0">
-            <img id="modal-img" src="" class="img-fluid" alt="Product Image">
-          </div>
+          <div class="col-md-6 mb-3 mb-md-0"><img id="modal-img" src="" class="img-fluid rounded" alt="Product Image"></div>
           <div class="col-md-6 d-flex flex-column justify-content-center">
             <h3 id="modal-title" class="fw-bold"></h3>
             <p id="modal-text"></p>
             <ul class="product-details-list mt-2">
-                <li><strong>Fabric:</strong> <span id="modal-fabric"></span></li>
-                <li><strong>Fit:</strong> <span id="modal-fit"></span></li>
-                <li><strong>Care:</strong> <span id="modal-care"></span></li>
+                <li><strong>ID Barang:</strong> <span id="modal-id"></span></li>
+                <li><strong>Stok Tersedia:</strong> <span id="modal-stock"></span> unit</li>
             </ul>
-            <div class="mt-3">
-              <a href="#" class="btn btn-interactive">Add to Bag</a>
-            </div>
           </div>
         </div>
       </div>
@@ -310,111 +82,19 @@
   </div>
 </div>
 
-<a href="#" class="back-to-top"><i class="bi bi-arrow-up"></i></a>
-
-<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
-<script src="https://unpkg.com/isotope-layout@3/dist/isotope.pkgd.min.js"></script>
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    
-    // === Typing Effect Script ===
-    const words = ["Style", "Identity", "Future"];
-    let i = 0, j = 0, currentWord = "", isDeleting = false;
-    const typingEffectElement = document.getElementById("typing-effect");
-
-    function type() {
-        if (!typingEffectElement) return;
-        currentWord = words[i];
-        if (isDeleting) {
-            typingEffectElement.textContent = currentWord.substring(0, --j);
-        } else {
-            typingEffectElement.textContent = currentWord.substring(0, ++j);
-        }
-
-        if (!isDeleting && j === currentWord.length) {
-            setTimeout(() => isDeleting = true, 2000);
-        } else if (isDeleting && j === 0) {
-            isDeleting = false;
-            i = (i + 1) % words.length;
-        }
-        
-        setTimeout(type, isDeleting ? 100 : 200);
-    }
-    type();
-
-    // === Isotope Filter Script ===
-    const cardContainer = document.querySelector('.card-container');
-    if (cardContainer) {
-        const iso = new Isotope(cardContainer, {
-            itemSelector: '.filter-item',
-            layoutMode: 'fitRows'
-        });
-        const filterButtons = document.querySelectorAll('.filter-btn');
-        filterButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                filterButtons.forEach(btn => btn.classList.remove('active'));
-                this.classList.add('active');
-                iso.arrange({ filter: this.getAttribute('data-filter') });
-            });
-        });
-    }
-
-    // === Modal Data Script ===
     const productModal = document.getElementById('productModal');
     if(productModal) {
       productModal.addEventListener('show.bs.modal', function (event) {
           const button = event.relatedTarget;
-          const cardId = button.getAttribute('data-card');
-
-          const title = document.getElementById('title-' + cardId).textContent;
-          const text = document.getElementById('text-' + cardId).textContent;
-          const imgSrc = document.getElementById('img-' + cardId).src;
-          
-          // [UPDATED] Data untuk detail pakaian
-          const details = {
-              '1': { fabric: 'Heavyweight Cotton Fleece', fit: 'Oversized', care: 'Machine wash cold' },
-              '2': { fabric: 'Merino Wool Blend', fit: 'Regular Fit', care: 'Hand wash or dry clean' },
-              '3': { fabric: 'Nylon Tech-Weave', fit: 'True to Size', care: 'Wipe clean with a damp cloth' },
-              '4': { fabric: 'Durable Cotton Twill', fit: 'Relaxed Tapered', care: 'Machine wash warm' },
-              '5': { fabric: 'Premium Satin Polyester', fit: 'Standard Fit', care: 'Dry clean recommended' },
-              '6': { fabric: '98% Cotton, 2% Elastane', fit: 'Slim Straight', care: 'Machine wash cold inside out' }
-          };
-          const productDetails = details[cardId] || { fabric: 'N/A', fit: 'N/A', care: 'N/A' };
-
-          // Update konten modal
-          productModal.querySelector('#modal-title').textContent = title;
-          productModal.querySelector('#modal-text').textContent = text;
-          productModal.querySelector('#modal-img').src = imgSrc;
-          productModal.querySelector('#modal-fabric').textContent = productDetails.fabric;
-          productModal.querySelector('#modal-fit').textContent = productDetails.fit;
-          productModal.querySelector('#modal-care').textContent = productDetails.care;
+          productModal.querySelector('#modal-title').textContent = button.getAttribute('data-title');
+          productModal.querySelector('#modal-text').textContent = button.getAttribute('data-text');
+          productModal.querySelector('#modal-img').src = button.getAttribute('data-img');
+          productModal.querySelector('#modal-id').textContent = button.getAttribute('data-id');
+          productModal.querySelector('#modal-stock').textContent = button.getAttribute('data-stock');
       });
-    }
-
-    // === Swiper JS for Testimonials ===
-    new Swiper('.swiper-container', {
-        effect: 'coverflow', grabCursor: true, centeredSlides: true,
-        slidesPerView: 'auto', loop: true,
-        autoplay: { delay: 4000, disableOnInteraction: false },
-        coverflowEffect: {
-            rotate: 50, stretch: 0, depth: 100, modifier: 1, slideShadows: true,
-        },
-        pagination: { el: '.swiper-pagination', clickable: true },
-    });
-
-    // === Back to Top Button Script ===
-    const backToTopButton = document.querySelector('.back-to-top');
-    if (backToTopButton) {
-        window.addEventListener('scroll', () => {
-            backToTopButton.style.display = (window.scrollY > 300) ? 'inline' : 'none';
-        });
-        backToTopButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
     }
 });
 </script>
-
-{%endblock%}
+{% endblock %}
