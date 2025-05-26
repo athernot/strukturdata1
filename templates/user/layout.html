@@ -350,12 +350,27 @@
 
                 <!-- Admin Button -->
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link admin-btn" href="/admin/home">
-                            <i class="fas fa-user-shield nav-icon"></i>Admin
-                        </a>
-                    </li>
-                </ul>
+    {% if 'user_id' in session %}
+        {% if session.user_role == 'admin' %}
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('admin_home') }}">
+                <i class="fas fa-tachometer-alt nav-icon"></i> Dashboard
+            </a>
+        </li>
+        {% endif %}
+        <li class="nav-item">
+            <a class="nav-link admin-btn" href="{{ url_for('logout') }}">
+                <i class="fas fa-sign-out-alt nav-icon"></i> Logout
+            </a>
+        </li>
+    {% else %}
+        <li class="nav-item">
+            <a class="nav-link admin-btn" href="{{ url_for('login') }}">
+                <i class="fas fa-user-shield nav-icon"></i> Login / Register
+            </a>
+        </li>
+    {% endif %}
+</ul>
             </div>
         </div>
     </nav>

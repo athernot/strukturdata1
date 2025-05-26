@@ -186,18 +186,17 @@
                 </a>
             
             <li class="nav-item mt-auto">
-                <a class="nav-link" href="/">
+                <a class="nav-link" href="/logout">
                     <i class="fas fa-sign-out-alt nav-icon"></i> Kembali / Logout
                 </a>
             </li>
         </ul>
     </nav>
-
     <div class="topbar">
         <div class="admin-info dropdown">
             <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-                <img src="https://i.pravatar.cc/40" alt="" class="rounded-circle me-2">
-                <strong>Admin User</strong>
+                <img src="https://i.pravatar.cc/40" ...> <img src="https://i.pravatar.cc/40?u={{ session.username }}" ...>
+                <strong>Admin User</strong> <strong>{{ session.get('username', 'Admin') }}</strong>
             </a>
             <ul class="dropdown-menu dropdown-menu-end text-small shadow" aria-labelledby="dropdownUser1">
                 <li><a class="dropdown-item" href="#">Profil</a></li>
@@ -207,7 +206,16 @@
             </ul>
         </div>
     </div>
-    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
     <div class="main-content">
         {% block isi %} {% endblock %}
     </div>
