@@ -1,29 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>{% block title %}Dashboard Admin{% endblock %}</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <style>
         body {
-            margin: 0;
             font-family: 'Poppins', sans-serif;
-            background-color: #f8f9fa; /* Softer background color */
+            background-color: #f0f2f5;
         }
-
         .sidebar {
             width: 260px;
             height: 100vh;
-            background-color: #212529; /* Darker sidebar */
+            background-color: #212529;
             color: #fff;
             position: fixed;
             top: 0;
@@ -32,88 +29,35 @@
             flex-direction: column;
             transition: width 0.3s ease;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 1001;
         }
-
         .sidebar-header {
             padding: 20px;
             text-align: center;
             background-color: #1a1d20;
             border-bottom: 1px solid #343a40;
         }
-
-        .sidebar-header h2 {
-            margin: 0;
-            font-size: 1.7rem;
-            font-weight: 600;
-        }
-
-        .sidebar .nav {
-            flex-grow: 1; /* Allow nav to take remaining space */
-            list-style: none;
-            padding: 10px 0;
-            margin: 0;
-        }
-        
+        .sidebar-header h2 { margin: 0; font-size: 1.7rem; font-weight: 600; }
+        .sidebar .nav { flex-grow: 1; list-style: none; padding: 10px 0; margin: 0; }
         .nav-item .nav-link {
-            display: flex; /* Use flex for icon alignment */
+            display: flex;
             align-items: center;
             padding: 12px 20px;
             color: #adb5bd;
             text-decoration: none;
             transition: background-color 0.3s, color 0.3s, border-left-color 0.3s;
-            border-left: 4px solid transparent; /* For active indicator */
+            border-left: 4px solid transparent;
             font-weight: 500;
         }
-
-        .nav-link i.nav-icon {
-            width: 25px; /* Fixed width for icon */
-            margin-right: 15px;
-            font-size: 1.1rem;
-            text-align: center;
-        }
-
-        .nav-link:hover {
-            background-color: #343a40;
-            color: #fff;
-            border-left-color: #6c757d;
-        }
-
-        .nav-link.active {
-            background-color: #0d6efd; /* Bootstrap primary color */
-            color: #fff;
-            border-left-color: #ffffff; /* White indicator */
-        }
-        
-        /* [IMPROVEMENT] Dropdown Submenu */
-        .nav-item .dropdown-toggle::after {
-            margin-left: auto; /* Push arrow to the right */
-            transition: transform 0.3s ease;
-        }
-        .nav-item .dropdown-toggle[aria-expanded="true"]::after {
-            transform: rotate(90deg);
-        }
-
-        .dropdown-menu {
-            background-color: #1a1d20;
-            border: none;
-            padding: 0;
-            margin-left: 20px; /* Indent submenu */
-        }
-
-        .dropdown-item {
-            color: #adb5bd;
-            padding: 10px 20px;
-        }
-        .dropdown-item:hover, .dropdown-item:focus {
-            background-color: #343a40;
-            color: #fff;
-        }
-        
-        /* [IMPROVEMENT] Logout/Back button at the bottom */
-        .nav-item.mt-auto {
-            border-top: 1px solid #343a40;
-        }
-
+        .nav-link i.nav-icon { width: 25px; margin-right: 15px; font-size: 1.1rem; text-align: center; }
+        .nav-link:hover { background-color: #343a40; color: #fff; border-left-color: #6c757d; }
+        .nav-link.active { background-color: #0d6efd; color: #fff; border-left-color: #ffffff; }
+        .nav-item .dropdown-toggle::after { margin-left: auto; transition: transform 0.3s ease; }
+        .nav-item .dropdown-toggle[aria-expanded="true"]::after { transform: rotate(90deg); }
+        .dropdown-menu { background-color: #1a1d20; border: none; padding: 0; margin-left: 20px; }
+        .dropdown-item { color: #adb5bd; padding: 10px 20px; }
+        .dropdown-item:hover, .dropdown-item:focus { background-color: #343a40; color: #fff; }
+        .nav-item.mt-auto { border-top: 1px solid #343a40; }
         .topbar {
             height: 60px;
             display: flex;
@@ -128,115 +72,87 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.08);
             z-index: 1000;
         }
-
-        /* [IMPROVEMENT] Admin Dropdown */
-        .admin-info .dropdown-toggle {
-            color: #343a40;
-        }
-        .admin-info .dropdown-toggle::after {
-            display: none; /* Hide default arrow */
-        }
-        .admin-info img {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-
-        .main-content {
-            margin-left: 260px; 
-            padding: 80px 30px 30px 30px; /* 60px topbar + 20px space */
-            transition: margin-left 0.3s ease;
-        }
+        .admin-info .dropdown-toggle::after { display: none; }
+        .admin-info img { width: 35px; height: 35px; border-radius: 50%; margin-right: 10px; object-fit: cover; }
+        .main-content { margin-left: 260px; padding: 80px 30px 30px 30px; transition: margin-left 0.3s ease; }
+        .flash-messages { position: fixed; top: 70px; right: 20px; z-index: 2000; width: auto; max-width: 400px; }
     </style>
 </head>
 <body>
     
     <nav class="sidebar">
         <div class="sidebar-header">
-            <h2>Admin</h2>
+            <h2>Admin Panel</h2>
         </div>
         
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link" href="/admin/home">
+                <a class="nav-link" href="{{ url_for('admin_home') }}">
                     <i class="fas fa-tachometer-alt nav-icon"></i> Home
                 </a>
             </li>
-            
             <li class="nav-item">
-                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#kelolaSubmenu" aria-expanded="false" aria-controls="kelolaSubmenu">
-                    <i class="fas fa-box-open nav-icon"></i> Kelola Inventaris
+                <a class="nav-link" href="{{ url_for('kelola_gudang') }}">
+                    <i class="fas fa-warehouse nav-icon"></i> Kelola Gudang
                 </a>
-                <div class="collapse" id="kelolaSubmenu">
-                    <ul class="nav flex-column ms-4">
-                        <li class="nav-item">
-                           <a class="nav-link" href="/admin/admin-kelola-barang">Tambahkan Barang</a>
-                        </li>
-                        <li class="nav-item">
-                           <a class="nav-link" href="/admin/admin-kelola-gudang">Kelola Gudang</a>
-                        </li>
-                    </ul>
-                </div>
             </li>
-            
             <li class="nav-item">
-                <a class="nav-link" href="/admin/admin-laporan">
+                <a class="nav-link" href="{{ url_for('laporan') }}">
                     <i class="fas fa-chart-bar nav-icon"></i> Laporan
                 </a>
-            
+            </li>
             <li class="nav-item mt-auto">
-                <a class="nav-link" href="/logout">
-                    <i class="fas fa-sign-out-alt nav-icon"></i> Kembali / Logout
+                <a class="nav-link" href="{{ url_for('logout') }}">
+                    <i class="fas fa-sign-out-alt nav-icon"></i> Logout
                 </a>
             </li>
         </ul>
     </nav>
+
     <div class="topbar">
         <div class="admin-info dropdown">
             <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-                <img src="https://i.pravatar.cc/40" ...> <img src="https://i.pravatar.cc/40?u={{ session.username }}" ...>
-                <strong>Admin User</strong> <strong>{{ session.get('username', 'Admin') }}</strong>
+                <img src="https://i.pravatar.cc/40?u={{ session.get('username', 'default') }}" alt="Admin Avatar">
+                <strong>{{ session.get('username', 'Admin') }}</strong>
             </a>
             <ul class="dropdown-menu dropdown-menu-end text-small shadow" aria-labelledby="dropdownUser1">
                 <li><a class="dropdown-item" href="#">Profil</a></li>
                 <li><a class="dropdown-item" href="#">Pengaturan</a></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="#">Logout</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a></li>
             </ul>
         </div>
     </div>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        {% for category, message in messages %}
-            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
-    {% endwith %}
-    <div class="main-content">
-        {% block isi %} {% endblock %}
+    
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
     </div>
+
+    <main class="main-content">
+        {% block isi %}
+        {% endblock %}
+    </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Skrip untuk menandai link navigasi yang aktif
             const currentPath = window.location.pathname;
-            const links = document.querySelectorAll('.sidebar .nav-link');
-            
-            links.forEach(link => {
-                // Check if the link's href is the current path
+            document.querySelectorAll('.sidebar .nav-link').forEach(link => {
                 if (link.getAttribute('href') === currentPath) {
                     link.classList.add('active');
-
-                    // If the active link is inside a collapsed submenu, expand it
                     const collapse = link.closest('.collapse');
                     if (collapse) {
-                        new bootstrap.Collapse(collapse, {
-                            toggle: true
-                        });
+                        new bootstrap.Collapse(collapse, { toggle: true });
                     }
                 }
             });

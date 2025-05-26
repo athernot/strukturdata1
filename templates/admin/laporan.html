@@ -1,330 +1,121 @@
 {% extends 'admin/layout.html' %}
+{% block title %}Laporan{% endblock %}
+
 {% block isi %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <style>
-        body {
-            margin: 0;
-            font-family: 'Poppins', sans-serif;
-            background-color: #f8f9fa; 
-        }
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Laporan</h1>
+    <p class="mb-4">Buat dan kelola laporan kinerja atau masalah teknis.</p>
 
-        .sidebar {
-            width: 260px;
-            height: 100vh;
-            background-color: #212529; 
-            color: #fff;
-            position: fixed;
-            top: 0;
-            left: 0;
-            display: flex;
-            flex-direction: column;
-            transition: width 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        .sidebar-header {
-            padding: 20px;
-            text-align: center;
-            background-color: #1a1d20;
-            border-bottom: 1px solid #343a40;
-        }
-
-        .sidebar-header h2 {
-            margin: 0;
-            font-size: 1.7rem;
-            font-weight: 600;
-        }
-
-        .sidebar .nav {
-            flex-grow: 1;
-            list-style: none;
-            padding: 10px 0;
-            margin: 0;
-        }
-        
-        .nav-item .nav-link {
-            display: flex; 
-            align-items: center;
-            padding: 12px 20px;
-            color: #adb5bd;
-            text-decoration: none;
-            transition: background-color 0.3s, color 0.3s, border-left-color 0.3s;
-            border-left: 4px solid transparent; 
-            font-weight: 500;
-        }
-
-        .nav-link i.nav-icon {
-            width: 25px; 
-            margin-right: 15px;
-            font-size: 1.1rem;
-            text-align: center;
-        }
-
-        .nav-link:hover {
-            background-color: #343a40;
-            color: #fff;
-            border-left-color: #6c757d;
-        }
-
-        .nav-link.active {
-            background-color: #0d6efd; 
-            color: #fff;
-            border-left-color: #ffffff; 
-        }
-        
-        .nav-item .dropdown-toggle::after {
-            margin-left: auto; 
-            transition: transform 0.3s ease;
-        }
-        .nav-item .dropdown-toggle[aria-expanded="true"]::after {
-            transform: rotate(90deg);
-        }
-
-        .dropdown-menu {
-            background-color: #1a1d20;
-            border: none;
-            padding: 0;
-            margin-left: 20px; 
-        }
-
-        .dropdown-item {
-            color: #adb5bd;
-            padding: 10px 20px;
-        }
-        .dropdown-item:hover, .dropdown-item:focus {
-            background-color: #343a40;
-            color: #fff;
-        }
-        
-        .nav-item.mt-auto {
-            border-top: 1px solid #343a40;
-        }
-
-        .topbar {
-            height: 60px;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            padding: 0 30px;
-            position: fixed;
-            top: 0;
-            left: 260px;
-            right: 0;
-            background: #fff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-            z-index: 1000;
-        }
-
-        .admin-info .dropdown-toggle {
-            color: #343a40;
-        }
-        .admin-info .dropdown-toggle::after {
-            display: none; 
-        }
-        .admin-info img {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-
-        .main-content {
-            margin-left: 260px; 
-            padding: 80px 30px 30px 30px;
-            transition: margin-left 0.3s ease;
-        }
-    </style>
-</head>
-<body>
-    
-    <nav class="sidebar">
-        <div class="sidebar-header">
-            <h2>Admin</h2>
-        </div>
-        
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <a class="nav-link" href="/admin/home">
-                    <i class="fas fa-tachometer-alt nav-icon"></i> Home
-                </a>
-            </li>
-            
-            <li class="nav-item">
-                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#kelolaSubmenu" aria-expanded="false" aria-controls="kelolaSubmenu">
-                    <i class="fas fa-box-open nav-icon"></i> Kelola Inventaris
-                </a>
-                <div class="collapse" id="kelolaSubmenu">
-                    <ul class="nav flex-column ms-4">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/admin/admin-kelola-barang">Tambahkan Barang</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/admin/admin-kelola-gudang">Kelola Gudang</a>
-                        </li>
-                    </ul>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body text-center">
+                    <i class="fas fa-chart-line fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Laporan Kinerja</h5>
+                    <p class="card-text text-muted">Buat laporan terkait performa dan pencapaian.</p>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#kinerjaModal">
+                        Buat Laporan Kinerja
+                    </button>
                 </div>
-            </li>
-            
-            <li class="nav-item">
-                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="collapse" data-bs-target="#laporanSubmenu" aria-expanded="false" aria-controls="laporanSubmenu">
-                    <i class="fas fa-chart-bar nav-icon"></i> Laporan
-                </a>
-                <div class="collapse" id="laporanSubmenu">
-                    <ul class="nav flex-column ms-4">
-                        <li class="nav-item">
-                            <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#kinerjaModal">
-                                <i class="fas fa-chart-line nav-icon"></i> Laporan Kinerja
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#troubleModal">
-                                <i class="fas fa-exclamation-triangle nav-icon"></i> Laporan Trouble
-                            </a>
-                        </li>
-                    </ul>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body text-center">
+                    <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+                    <h5 class="card-title">Laporan Masalah</h5>
+                    <p class="card-text text-muted">Laporkan kendala atau masalah teknis yang terjadi.</p>
+                     <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#troubleModal">
+                        Buat Laporan Masalah
+                    </button>
                 </div>
-            </li>
-            
-            <li class="nav-item mt-auto">
-                <a class="nav-link" href="/">
-                    <i class="fas fa-sign-out-alt nav-icon"></i> Kembali / Logout
-                </a>
-            </li>
-        </ul>
-    </nav>
-
-    <div class="topbar">
-        <div class="admin-info dropdown">
-            <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-                <img src="https://i.pravatar.cc/40" alt="" class="rounded-circle me-2">
-                <strong>Admin User</strong>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end text-small shadow" aria-labelledby="dropdownUser1">
-                <li><a class="dropdown-item" href="#">Profil</a></li>
-                <li><a class="dropdown-item" href="#">Pengaturan</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="#">Logout</a></li>
-            </ul>
+            </div>
         </div>
     </div>
-    <div class="modal fade" id="kinerjaModal" tabindex="-1" aria-labelledby="kinerjaModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="kinerjaModalLabel">Buat Laporan Kinerja</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<div class="modal fade" id="kinerjaModal" tabindex="-1" aria-labelledby="kinerjaModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="kinerjaModalLabel">Buat Laporan Kinerja</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="kinerjaForm">
+          <div class="mb-3">
+            <label for="kinerja-user" class="form-label">Nama User/Divisi</label>
+            <input type="text" class="form-control" id="kinerja-user" required>
           </div>
-          <div class="modal-body">
-            <form id="kinerjaForm">
-              <div class="mb-3">
-                <label for="kinerja-user" class="form-label">Nama User</label>
-                <input type="text" class="form-control" id="kinerja-user" required>
-              </div>
-              <div class="mb-3">
-                <label for="kinerja-message" class="form-label">Pesan Kinerja</label>
-                <textarea class="form-control" id="kinerja-message" rows="4" required></textarea>
-              </div>
-            </form>
+          <div class="mb-3">
+            <label for="kinerja-message" class="form-label">Detail Laporan Kinerja</label>
+            <textarea class="form-control" id="kinerja-message" rows="4" required></textarea>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-            <button type="button" class="btn btn-primary" onclick="submitReport('kinerja')">Kirim Laporan</button>
-          </div>
-        </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-primary" onclick="submitReport('kinerja')">Kirim Laporan</button>
       </div>
     </div>
+  </div>
+</div>
 
-    <div class="modal fade" id="troubleModal" tabindex="-1" aria-labelledby="troubleModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="troubleModalLabel">Buat Laporan Trouble</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<div class="modal fade" id="troubleModal" tabindex="-1" aria-labelledby="troubleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="troubleModalLabel">Buat Laporan Masalah</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="troubleForm">
+          <div class="mb-3">
+            <label for="trouble-location" class="form-label">Lokasi/Departemen</label>
+            <input type="text" class="form-control" id="trouble-location" required>
           </div>
-          <div class="modal-body">
-            <form id="troubleForm">
-              <div class="mb-3">
-                <label for="trouble-location" class="form-label">Lokasi/Departemen</label>
-                <input type="text" class="form-control" id="trouble-location" required>
-              </div>
-              <div class="mb-3">
-                <label for="trouble-message" class="form-label">Detail Masalah</label>
-                <textarea class="form-control" id="trouble-message" rows="4" required></textarea>
-              </div>
-            </form>
+          <div class="mb-3">
+            <label for="trouble-message" class="form-label">Detail Masalah</label>
+            <textarea class="form-control" id="trouble-message" rows="4" required></textarea>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-            <button type="button" class="btn btn-danger" onclick="submitReport('trouble')">Kirim Laporan</button>
-          </div>
-        </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-danger" onclick="submitReport('trouble')">Kirim Laporan</button>
       </div>
     </div>
+  </div>
+</div>
 
-    <div class="toast-container position-fixed bottom-0 end-0 p-3">
-      <div id="reportToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-          <strong class="me-auto">Notifikasi</strong>
-          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">
-          Laporan berhasil dikirim!
-        </div>
-      </div>
-    </div>
+<script>
+    function submitReport(type) {
+        let modalId, formId;
+        if (type === 'kinerja') {
+            modalId = 'kinerjaModal';
+            formId = 'kinerjaForm';
+        } else if (type === 'trouble') {
+            modalId = 'troubleModal';
+            formId = 'troubleForm';
+        }
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const currentPath = window.location.pathname;
-            const links = document.querySelectorAll('.sidebar .nav-link');
-            
-            links.forEach(link => {
-                const linkPath = link.getAttribute('href');
-                if (linkPath && linkPath !== '#' && currentPath.startsWith(linkPath)) {
-                    link.classList.add('active');
+        if (modalId && formId) {
+            // Logika untuk mengirim laporan (bisa via AJAX ke server)
+            console.log(`Laporan ${type} dikirim.`);
 
-                    const collapse = link.closest('.collapse');
-                    if (collapse) {
-                        new bootstrap.Collapse(collapse, {
-                            toggle: true
-                        });
-                    }
-                }
-            });
-        });
-
-        function submitReport(type) {
-            const toastEl = document.getElementById('reportToast');
-            const toast = new bootstrap.Toast(toastEl);
-            
-            if (type === 'kinerja') {
-                const modal = bootstrap.Modal.getInstance(document.getElementById('kinerjaModal'));
-                document.getElementById('kinerjaForm').reset();
-                modal.hide();
-            } else if (type === 'trouble') {
-                const modal = bootstrap.Modal.getInstance(document.getElementById('troubleModal'));
-                document.getElementById('troubleForm').reset();
+            // Tutup modal dan reset form
+            const modal = bootstrap.Modal.getInstance(document.getElementById(modalId));
+            if (modal) {
                 modal.hide();
             }
+            document.getElementById(formId).reset();
             
-            toast.show();
+            // Tampilkan notifikasi flash message (menggunakan logika flash Flask)
+            // Karena ini di sisi klien, kita tidak bisa langsung memanggil flash().
+            // Alternatifnya adalah menampilkan notifikasi toast atau mengarahkan ulang halaman.
+            // Di sini, kita akan mem-flash pesan di sesi (jika ada backend) atau hanya log.
+            alert('Laporan berhasil dikirim! (Simulasi)');
         }
-    </script>
-</body>
-</html>
+    }
+</script>
 {% endblock %}

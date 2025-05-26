@@ -1,14 +1,16 @@
 # main.py
 
+import os
+import sqlite3
+from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
-from functools import wraps
-import sqlite3
-import os
 
+# --- KONFIGURASI APLIKASI ---
 app = Flask(__name__)
-# [BARU] Kunci rahasia diperlukan untuk sesi dan pesan flash
-app.secret_key = 'kunci_rahasia_super_aman_yang_harus_diganti'
+# Kunci rahasia diperlukan untuk sesi dan pesan flash.
+# Ganti dengan kunci yang lebih aman di lingkungan produksi.
+app.secret_key = 'super_secret_key_that_should_be_changed'
 
 # Lokasi database
 DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'gudang.db')
@@ -16,11 +18,12 @@ DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'gudang.db')
 def get_db_connection():
     """Membuat koneksi ke database SQLite."""
     conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row
+    conn.row_factory = sqlite3.Row  # Memungkinkan akses kolom berdasarkan nama
     return conn
 
-# === [BARU] DECORATOR UNTUK OTENTIKASI ===
+# --- DECORATOR OTENTIKASI ---
 def login_required(f):
+    """Decorator untuk memastikan user sudah login."""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
@@ -30,18 +33,17 @@ def login_required(f):
     return decorated_function
 
 def admin_required(f):
+    """Decorator untuk memastikan user adalah admin."""
     @wraps(f)
+    @login_required  # Admin juga harus login
     def decorated_function(*args, **kwargs):
-        if 'user_id' not in session:
-            flash('Anda harus login untuk mengakses halaman ini.', 'warning')
-            return redirect(url_for('login'))
         if session.get('user_role') != 'admin':
-            flash('Anda tidak memiliki izin untuk mengakses halaman ini.', 'danger')
-            return redirect(url_for('admin_home')) # atau halaman lain
+            flash('Hanya admin yang dapat mengakses halaman ini.', 'danger')
+            return redirect(url_for('admin_home'))  # Arahkan ke dashboard admin
         return f(*args, **kwargs)
     return decorated_function
 
-# === [BARU] RUTE OTENTIKASI ===
+# --- RUTE OTENTIKASI ---
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -57,14 +59,15 @@ def login():
             session['user_id'] = user['id']
             session['username'] = user['username']
             session['user_role'] = user['role']
-            flash(f"Selamat datang, {user['username']}!", 'success')
+            flash(f"Selamat datang kembali, {user['username']}!", 'success')
+            
             if user['role'] == 'admin':
                 return redirect(url_for('admin_home'))
             else:
-                # Arahkan user biasa ke halaman utama user
-                return redirect(url_for('index'))
+                return redirect(url_for('index')) # Arahkan user biasa
         else:
             flash('Username atau password salah.', 'danger')
+            
     return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -72,7 +75,6 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
         
         conn = get_db_connection()
@@ -89,13 +91,13 @@ def register():
     return render_template('register.html')
 
 @app.route('/logout')
+@login_required
 def logout():
     session.clear()
     flash('Anda telah berhasil logout.', 'info')
     return redirect(url_for('login'))
 
-
-# --- Rute User (Tidak perlu login) ---
+# --- RUTE HALAMAN PENGGUNA (UMUM) ---
 @app.route('/')
 def index():
     return render_template('user/index.html')
@@ -108,88 +110,93 @@ def tentang():
 def kontak():
     return render_template('user/kontak.html')
 
-# --- Rute Admin (Dilindungi) ---
-
+# --- RUTE HALAMAN ADMIN (TERLINDUNGI) ---
 @app.route('/admin/home')
 @login_required
 def admin_home():
+    # Periksa role untuk memastikan hanya admin atau user yang login bisa masuk
+    # Konten halaman bisa disesuaikan berdasarkan role jika perlu
     return render_template('admin/index.html')
 
-@app.route('/admin/admin-kelola-barang')
+@app.route('/admin/kelola-gudang')
 @admin_required
-def kelolabarang():
-    # Arahkan ke gudang karena barang.html statis
-    return redirect(url_for('kelolagudang'))
-
-@app.route('/admin/admin-kelola-gudang')
-@admin_required
-def kelolagudang():
+def kelola_gudang():
     conn = get_db_connection()
-    items = conn.execute('SELECT * FROM gudang ORDER BY tanggal DESC').fetchall()
+    items = conn.execute('SELECT * FROM gudang ORDER BY tanggal DESC, id DESC').fetchall()
     conn.close()
     return render_template('admin/gudang.html', items=items)
 
-@app.route('/admin/admin-laporan')
+@app.route('/admin/laporan')
 @admin_required
 def laporan():
     return render_template('admin/laporan.html')
 
+# --- OPERASI CRUD GUDANG (HANYA ADMIN) ---
 @app.route('/admin/gudang/add', methods=['POST'])
 @admin_required
 def add_item():
-    if request.method == 'POST':
-        id_barang = request.form['id_barang']
-        nama_barang = request.form['nama_barang']
-        tanggal = request.form['tanggal']
-        jumlah = request.form['jumlah']
+    id_barang = request.form['id_barang']
+    nama_barang = request.form['nama_barang']
+    tanggal = request.form['tanggal']
+    jumlah = request.form['jumlah']
 
-        conn = get_db_connection()
-        try:
-            conn.execute('INSERT INTO gudang (id_barang, nama_barang, tanggal, jumlah) VALUES (?, ?, ?, ?)',
-                         (id_barang, nama_barang, tanggal, int(jumlah)))
-            conn.commit()
-            flash('Barang berhasil ditambahkan!', 'success')
-        except sqlite3.IntegrityError:
-            flash('ID Barang sudah ada, gunakan ID lain.', 'danger')
-        finally:
-            conn.close()
-        
-        return redirect(url_for('kelolagudang'))
-    return redirect(url_for('kelolagudang'))
+    conn = get_db_connection()
+    try:
+        conn.execute('INSERT INTO gudang (id_barang, nama_barang, tanggal, jumlah) VALUES (?, ?, ?, ?)',
+                     (id_barang, nama_barang, tanggal, int(jumlah)))
+        conn.commit()
+        flash('Barang berhasil ditambahkan!', 'success')
+    except sqlite3.IntegrityError:
+        flash(f"ID Barang '{id_barang}' sudah ada. Gunakan ID lain.", 'danger')
+    except (ValueError, TypeError):
+        flash('Jumlah harus berupa angka.', 'danger')
+    finally:
+        conn.close()
+    
+    return redirect(url_for('kelola_gudang'))
 
 @app.route('/admin/gudang/edit/<int:id>', methods=['POST'])
 @admin_required
 def edit_item(id):
-    if request.method == 'POST':
-        id_barang_form = request.form['id_barang']
-        nama_barang_form = request.form['nama_barang']
-        tanggal_form = request.form['tanggal']
-        jumlah_form = request.form['jumlah']
-        
-        conn = get_db_connection()
+    id_barang_form = request.form['id_barang']
+    nama_barang_form = request.form['nama_barang']
+    tanggal_form = request.form['tanggal']
+    jumlah_form = request.form['jumlah']
+    
+    conn = get_db_connection()
+    try:
         conn.execute('UPDATE gudang SET id_barang = ?, nama_barang = ?, tanggal = ?, jumlah = ? WHERE id = ?',
                      (id_barang_form, nama_barang_form, tanggal_form, int(jumlah_form), id))
         conn.commit()
-        conn.close()
         flash('Data barang berhasil diperbarui!', 'info')
-        return redirect(url_for('kelolagudang'))
-    return redirect(url_for('kelolagudang'))
+    except sqlite3.IntegrityError:
+        flash(f"ID Barang '{id_barang_form}' sudah digunakan oleh item lain.", 'danger')
+    except (ValueError, TypeError):
+        flash('Jumlah harus berupa angka.', 'danger')
+    finally:
+        conn.close()
+
+    return redirect(url_for('kelola_gudang'))
 
 @app.route('/admin/gudang/delete/<int:id>', methods=['POST'])
 @admin_required
 def delete_item(id):
-    if request.method == 'POST':
-        conn = get_db_connection()
-        conn.execute('DELETE FROM gudang WHERE id = ?', (id,))
-        conn.commit()
-        conn.close()
-        flash('Data barang telah dihapus.', 'success')
-        return redirect(url_for('kelolagudang'))
-    return redirect(url_for('kelolagudang'))
+    conn = get_db_connection()
+    conn.execute('DELETE FROM gudang WHERE id = ?', (id,))
+    conn.commit()
+    conn.close()
+    flash('Data barang telah dihapus.', 'success')
+    return redirect(url_for('kelola_gudang'))
 
+# --- MAIN EXECUTION ---
 if __name__ == '__main__':
     # Pastikan database ada sebelum aplikasi dijalankan
     if not os.path.exists(DATABASE):
-        print(f"Database tidak ditemukan di '{DATABASE}'. Jalankan 'init_db.py' terlebih dahulu.")
-    else:
-        app.run(debug=True)
+        print(f"Database tidak ditemukan di '{DATABASE}'.")
+        print("Menjalankan 'init_db.py' untuk membuat database baru...")
+        # Secara otomatis memanggil fungsi inisialisasi jika file tidak ada
+        import init_db
+        init_db.initialize_database()
+    
+    # Menjalankan aplikasi dalam mode debug
+    app.run(debug=True)
