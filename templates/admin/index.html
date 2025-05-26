@@ -41,16 +41,7 @@
 <div class="container-fluid px-4 pb-4">
     <div class="d-flex justify-content-between align-items-center mt-4 mb-4">
         <h1 class="fw-bold text-dark-emphasis">Dashboard</h1>
-        <div class="d-flex align-items-center">
-            <i class="fas fa-calendar-alt text-muted me-2"></i>
-            <select id="dateRangeFilter" class="form-select form-select-sm" style="width: auto;">
-                <option value="last7days">7 Hari Terakhir</option>
-                <option value="thisMonth" selected>Bulan Ini</option>
-                <option value="last30days">30 Hari Terakhir</option>
-                <option value="thisYear">Tahun Ini</option>
-            </select>
         </div>
-    </div>
 
     <div class="row g-4 mb-4">
         <div class="col-xl-3 col-md-6">
@@ -58,8 +49,8 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <div class="small text-white-75">Total Barang</div>
-                            <div class="fs-2 fw-bold" id="totalBarang">1.280</div>
+                            <div class="small text-white-75">Total Stok Barang</div>
+                            <div class="fs-2 fw-bold" id="totalBarang">{{ total_items }}</div>
                         </div>
                         <i class="fas fa-box fa-3x text-white-50"></i>
                     </div>
@@ -71,8 +62,8 @@
                 <div class="card-body">
                      <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <div class="small text-white-75">Barang Masuk</div>
-                            <div class="fs-2 fw-bold" id="barangMasuk">152</div>
+                            <div class="small text-white-75">Jumlah Jenis Barang</div>
+                            <div class="fs-2 fw-bold" id="barangMasuk">{{ unique_items }}</div>
                         </div>
                         <i class="fas fa-dolly fa-3x text-white-50"></i>
                     </div>
@@ -85,7 +76,7 @@
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <div class="small text-white-75">Barang Keluar</div>
-                            <div class="fs-2 fw-bold" id="barangKeluar">98</div>
+                            <div class="fs-2 fw-bold" id="barangKeluar">{{ barang_keluar }}</div>
                         </div>
                         <i class="fas fa-truck-loading fa-3x text-white-50"></i>
                     </div>
@@ -98,7 +89,7 @@
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <div class="small text-white-75">Stok Kritis</div>
-                            <div class="fs-2 fw-bold" id="stokKritis">12</div>
+                            <div class="fs-2 fw-bold" id="stokKritis">{{ stok_kritis }}</div>
                         </div>
                         <i class="fas fa-exclamation-triangle fa-3x text-white-50"></i>
                     </div>
@@ -111,7 +102,7 @@
         <div class="col-lg-12">
             <div class="card shadow-sm border-0 rounded-4">
                 <div class="card-header bg-light py-3 border-0">
-                    <h6 class="mb-0 fw-bold text-dark-emphasis"><i class="fas fa-chart-line me-2"></i> Tren Aktivitas Gudang</h6>
+                    <h6 class="mb-0 fw-bold text-dark-emphasis"><i class="fas fa-chart-line me-2"></i> Tren Barang Masuk (7 Hari Terakhir)</h6>
                 </div>
                 <div class="card-body">
                     <div id="salesRevenueChart"></div>
@@ -123,18 +114,23 @@
 
 <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.49.0/dist/apexcharts.min.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.49.0/dist/apexcharts.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // Data dummy untuk grafik
+    // Mengambil data dari variabel Jinja2
+    const chartLabels = JSON.parse('{{ chart_labels | tojson | safe }}');
+    const chartDataMasuk = JSON.parse('{{ chart_data_masuk | tojson | safe }}');
+    const chartDataKeluar = JSON.parse('{{ chart_data_keluar | tojson | safe }}');
+
     const salesRevenueChartOptions = {
         series: [{
             name: 'Barang Masuk',
             type: 'column',
-            data: [50, 70, 60, 90, 80, 110, 100]
+            data: chartDataMasuk // Data dinamis
         }, {
             name: 'Barang Keluar',
             type: 'area',
-            data: [30, 40, 25, 50, 49, 60, 70]
+            data: chartDataKeluar // Data dinamis
         }],
         chart: {
             height: 350,
@@ -155,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 stops: [0, 100, 100, 100]
             }
         },
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul'],
+        labels: chartLabels, // Label dinamis
         markers: { size: 0 },
         xaxis: { type: 'category' },
         yaxis: { title: { text: 'Jumlah Unit' } },

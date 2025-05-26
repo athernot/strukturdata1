@@ -62,6 +62,14 @@
                                     data-deskripsi="{{ item.deskripsi or '' }}">
                                     <i class="fas fa-edit me-1"></i>Edit
                                 </button>
+                                <button class="btn btn-sm btn-warning"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#keluarModal"
+                                        data-id="{{ item.id }}"
+                                        data-nama-barang="{{ item.nama_barang }}"
+                                        data-stok-sekarang="{{ item.jumlah }}">
+                                    <i class="fas fa-arrow-up-from-bracket me-1"></i>Keluar
+                                </button>
                                 <button class="btn btn-sm btn-danger ms-1" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" 
                                     onclick="prepareDelete('{{ item.id }}')">
                                     <i class="fas fa-trash-alt me-1"></i>Hapus
@@ -145,56 +153,87 @@
     </div>
 </div>
 
+<div class="modal fade" id="keluarModal" tabindex="-1" aria-labelledby="keluarModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="keluarModalLabel">Form Barang Keluar</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="keluarForm" method="POST" action="{{ url_for('barang_keluar') }}">
+                <div class="modal-body">
+                    <input type="hidden" name="id_gudang" id="keluar_id_gudang">
+                    <p>Mengeluarkan barang: <strong id="keluar_nama_barang"></strong></p>
+                    <p>Stok saat ini: <strong id="keluar_stok_sekarang"></strong> unit</p>
+                    <div class="mb-3">
+                        <label for="jumlah_keluar" class="form-label">Jumlah Keluar</label>
+                        <input type="number" class="form-control" id="jumlah_keluar" name="jumlah_keluar" required min="1">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-warning">Proses Keluar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
     const itemModal = document.getElementById('itemModal');
     const modalTitle = document.getElementById('itemModalLabel');
     const itemForm = document.getElementById('itemForm');
     const deleteForm = document.getElementById('deleteForm');
+    const keluarModal = document.getElementById('keluarModal');
 
-    // Menggunakan event listener modern untuk menangani modal
-    itemModal.addEventListener('show.bs.modal', function (event) {
-        // Mengambil tombol yang memicu modal
-        const button = event.relatedTarget;
-        // Membaca atribut data-action untuk membedakan antara 'tambah' dan 'edit'
-        const action = button.getAttribute('data-action');
+    // Event listener untuk modal Tambah/Edit
+    if (itemModal) {
+        itemModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const action = button.getAttribute('data-action');
 
-        if (action === 'edit') {
-            // --- MODE EDIT ---
-            modalTitle.textContent = 'Edit Data Barang';
+            if (action === 'edit') {
+                modalTitle.textContent = 'Edit Data Barang';
+                const id = button.getAttribute('data-id');
+                itemForm.action = "{{ url_for('edit_item', id=0) }}".replace('0', id);
 
-            // Mengambil semua data dari atribut data-*
-            const id = button.getAttribute('data-id');
-            const id_barang = button.getAttribute('data-id-barang');
-            const nama_barang = button.getAttribute('data-nama-barang');
-            const deskripsi = button.getAttribute('data-deskripsi');
-            const gambar = button.getAttribute('data-gambar');
-            const tanggal = button.getAttribute('data-tanggal');
-            const jumlah = button.getAttribute('data-jumlah');
+                document.getElementById('id_barang').value = button.getAttribute('data-id-barang');
+                document.getElementById('nama_barang').value = button.getAttribute('data-nama-barang');
+                document.getElementById('deskripsi').value = button.getAttribute('data-deskripsi');
+                document.getElementById('gambar').value = button.getAttribute('data-gambar');
+                document.getElementById('tanggal').value = button.getAttribute('data-tanggal');
+                document.getElementById('jumlah').value = button.getAttribute('data-jumlah');
+                document.getElementById('id_barang').readOnly = true;
+            } else {
+                itemForm.reset();
+                modalTitle.textContent = 'Tambah Data Barang';
+                itemForm.action = "{{ url_for('add_item') }}";
+                document.getElementById('id_barang').readOnly = false;
+            }
+        });
+    }
 
-            // Menetapkan action form untuk edit
-            itemForm.action = "{{ url_for('edit_item', id=0) }}".replace('0', id);
-
-            // Mengisi field form dengan data yang diambil
-            document.getElementById('id_barang').value = id_barang;
-            document.getElementById('nama_barang').value = nama_barang;
-            document.getElementById('deskripsi').value = deskripsi;
-            document.getElementById('gambar').value = gambar;
-            document.getElementById('tanggal').value = tanggal;
-            document.getElementById('jumlah').value = jumlah;
-
-            // Membuat ID Barang tidak bisa diubah saat edit
-            document.getElementById('id_barang').readOnly = true;
-        } else {
-            // --- MODE TAMBAH ---
-            itemForm.reset();
-            modalTitle.textContent = 'Tambah Data Barang';
-            itemForm.action = "{{ url_for('add_item') }}";
-            document.getElementById('id_barang').readOnly = false;
-        }
-    });
-
+    // Fungsi untuk menyiapkan modal Hapus
     function prepareDelete(id) {
         deleteForm.action = "{{ url_for('delete_item', id=0) }}".replace('0', id);
+    }
+
+    // Event listener untuk modal Barang Keluar
+    if(keluarModal) {
+        keluarModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const id = button.getAttribute('data-id');
+            const namaBarang = button.getAttribute('data-nama-barang');
+            const stokSekarang = button.getAttribute('data-stok-sekarang');
+
+            document.getElementById('keluar_id_gudang').value = id;
+            document.getElementById('keluar_nama_barang').textContent = namaBarang;
+            document.getElementById('keluar_stok_sekarang').textContent = stokSekarang;
+            
+            const jumlahKeluarInput = document.getElementById('jumlah_keluar');
+            jumlahKeluarInput.max = stokSekarang;
+            jumlahKeluarInput.value = 1;
+        });
     }
 </script>
 {% endblock %}

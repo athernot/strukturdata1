@@ -52,6 +52,18 @@ def initialize_database():
         )
     ''')
 
+    print("NEW: Membuat tabel 'transaksi' untuk log barang...")
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS transaksi (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id_barang_gudang INTEGER NOT NULL,
+            nama_barang TEXT NOT NULL,
+            tipe TEXT NOT NULL,
+            jumlah INTEGER NOT NULL,
+            tanggal TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
     print("4. Menambahkan data awal ke tabel 'gudang'...")
     initial_items = [
         ('BRG-001', 'Sepatu Lari Adidas', 'Sepatu lari yang ringan dan nyaman untuk performa maksimal.', 'https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', '2024-05-20', 100),

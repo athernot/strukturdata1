@@ -3,6 +3,7 @@
 import os
 import sqlite3
 from functools import wraps
+# Menghapus jsonify karena tidak digunakan untuk render_template
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -107,7 +108,46 @@ def kontak():
 @app.route('/admin/home')
 @login_required
 def admin_home():
-    return render_template('admin/index.html')
+    conn = get_db_connection()
+    
+    # Menghitung Total Stok Barang
+    total_items_query = conn.execute('SELECT SUM(jumlah) FROM gudang').fetchone()
+    total_items = total_items_query[0] if total_items_query[0] is not None else 0
+
+    # Menghitung Jumlah Jenis Barang
+    unique_items_query = conn.execute('SELECT COUNT(id) FROM gudang').fetchone()
+    unique_items = unique_items_query[0] if unique_items_query[0] is not None else 0
+    
+    # Menghitung Stok Kritis (contoh: stok < 20)
+    KRITIS_THRESHOLD = 20
+    stok_kritis_query = conn.execute('SELECT COUNT(id) FROM gudang WHERE jumlah < ?', (KRITIS_THRESHOLD,)).fetchone()
+    stok_kritis = stok_kritis_query[0] if stok_kritis_query[0] is not None else 0
+
+    # Menghitung total barang keluar dari tabel transaksi (contoh: 30 hari terakhir)
+    barang_keluar_total_query = conn.execute("SELECT SUM(jumlah) FROM transaksi WHERE tipe = 'keluar' AND tanggal >= date('now', '-30 days')").fetchone()
+    total_barang_keluar = barang_keluar_total_query[0] if barang_keluar_total_query[0] is not None else 0
+
+    # Data untuk Grafik Tren (7 hari terakhir)
+    barang_masuk_trend = conn.execute("SELECT strftime('%Y-%m-%d', tanggal) as tgl, SUM(jumlah) as total FROM transaksi WHERE tipe = 'masuk' AND tanggal >= date('now', '-7 days') GROUP BY tgl ORDER BY tgl ASC").fetchall()
+    barang_keluar_trend = conn.execute("SELECT strftime('%Y-%m-%d', tanggal) as tgl, SUM(jumlah) as total FROM transaksi WHERE tipe = 'keluar' AND tanggal >= date('now', '-7 days') GROUP BY tgl ORDER BY tgl ASC").fetchall()
+    conn.close()
+
+    # Memproses data untuk grafik ApexCharts
+    dates = sorted(list(set([row['tgl'] for row in barang_masuk_trend] + [row['tgl'] for row in barang_keluar_trend])))
+    masuk_data_map = {row['tgl']: row['total'] for row in barang_masuk_trend}
+    keluar_data_map = {row['tgl']: row['total'] for row in barang_keluar_trend}
+    
+    chart_data_masuk = [masuk_data_map.get(date, 0) for date in dates]
+    chart_data_keluar = [keluar_data_map.get(date, 0) for date in dates]
+
+    return render_template('admin/index.html', 
+                           total_items=total_items,
+                           unique_items=unique_items,
+                           barang_keluar=total_barang_keluar,
+                           stok_kritis=stok_kritis,
+                           chart_labels=dates,
+                           chart_data_masuk=chart_data_masuk,
+                           chart_data_keluar=chart_data_keluar)
 
 @app.route('/admin/kelola-gudang')
 @admin_required
@@ -126,25 +166,63 @@ def laporan():
 @app.route('/admin/gudang/add', methods=['POST'])
 @admin_required
 def add_item():
-    id_barang = request.form['id_barang']
-    nama_barang = request.form['nama_barang']
-    tanggal = request.form['tanggal']
-    jumlah = request.form['jumlah']
-    deskripsi = request.form.get('deskripsi', '') 
-    gambar = request.form.get('gambar', '')
+    # ... (mengambil form data) ...
 
     conn = get_db_connection()
+    cursor = conn.cursor()
     try:
-        conn.execute('INSERT INTO gudang (id_barang, nama_barang, tanggal, jumlah, deskripsi, gambar) VALUES (?, ?, ?, ?, ?, ?)',
-                     (id_barang, nama_barang, tanggal, int(jumlah), deskripsi, gambar))
+        # Masukkan ke tabel gudang
+        cursor.execute('INSERT INTO gudang (id_barang, nama_barang, tanggal, jumlah, deskripsi, gambar) VALUES (?, ?, ?, ?, ?, ?)',
+                     (request.form['id_barang'], request.form['nama_barang'], request.form['tanggal'], int(request.form['jumlah']), request.form.get('deskripsi', ''), request.form.get('gambar', '')))
+        
+        new_item_id = cursor.lastrowid
+        
+        # Catat di tabel transaksi sebagai 'masuk'
+        cursor.execute('INSERT INTO transaksi (id_barang_gudang, nama_barang, tipe, jumlah) VALUES (?, ?, ?, ?)',
+                     (new_item_id, request.form['nama_barang'], 'masuk', int(request.form['jumlah'])))
+
         conn.commit()
         flash('Barang berhasil ditambahkan!', 'success')
     except sqlite3.IntegrityError:
-        flash(f"ID Barang '{id_barang}' sudah ada. Gunakan ID lain.", 'danger')
+        flash(f"ID Barang '{request.form['id_barang']}' sudah ada. Gunakan ID lain.", 'danger')
     except (ValueError, TypeError):
         flash('Jumlah harus berupa angka.', 'danger')
     finally:
         conn.close()
+    return redirect(url_for('kelola_gudang'))
+
+@app.route('/admin/gudang/keluar', methods=['POST'])
+@admin_required
+def barang_keluar():
+    id_gudang = request.form.get('id_gudang')
+    try:
+        jumlah_keluar = int(request.form.get('jumlah_keluar'))
+        if jumlah_keluar <= 0:
+            raise ValueError("Jumlah keluar harus positif")
+    except (ValueError, TypeError):
+        flash('Jumlah harus berupa angka positif.', 'danger')
+        return redirect(url_for('kelola_gudang'))
+
+    conn = get_db_connection()
+    item = conn.execute('SELECT * FROM gudang WHERE id = ?', (id_gudang,)).fetchone()
+
+    if not item or item['jumlah'] < jumlah_keluar:
+        flash('Stok tidak mencukupi atau barang tidak ditemukan.', 'danger')
+        conn.close()
+        return redirect(url_for('kelola_gudang'))
+
+    # Update stok di tabel gudang
+    stok_baru = item['jumlah'] - jumlah_keluar
+    conn.execute('UPDATE gudang SET jumlah = ? WHERE id = ?', (stok_baru, id_gudang))
+    
+    # Catat di tabel transaksi
+    conn.execute('INSERT INTO transaksi (id_barang_gudang, nama_barang, tipe, jumlah) VALUES (?, ?, ?, ?)',
+                 (id_gudang, item['nama_barang'], 'keluar', jumlah_keluar))
+    
+    conn.commit()
+    conn.close()
+    
+    flash(f"{jumlah_keluar} unit {item['nama_barang']} telah dikeluarkan dari gudang.", 'success')
     return redirect(url_for('kelola_gudang'))
 
 @app.route('/admin/gudang/edit/<int:id>', methods=['POST'])
