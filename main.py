@@ -1,8 +1,21 @@
+# main.py
+
 from flask import Flask, render_template, request, redirect, url_for
+import sqlite3
+import os
 
 app = Flask(__name__)
 
-# User Routes
+# Lokasi database
+DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'gudang.db')
+
+def get_db_connection():
+    """Membuat koneksi ke database SQLite."""
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row  # Ini memungkinkan kita mengakses kolom berdasarkan nama
+    return conn
+
+# --- User Routes (Tidak ada perubahan) ---
 @app.route('/')
 def index():
     return render_template('user/index.html')
@@ -15,116 +28,87 @@ def tentang():
 def kontak():
     return render_template('user/kontak.html')
 
-# Dummy data - nantinya ini akan diganti dengan data dari database Anda
-dummy_items = [
-    {'id': 1, 'id_barang': 'BRG-001', 'nama_barang': 'Sepatu Lari Adidas', 'tanggal': '2024-05-20', 'jumlah': 100},
-    {'id': 2, 'id_barang': 'BRG-002', 'nama_barang': 'Kaos Polos Katun', 'tanggal': '2024-05-22', 'jumlah': 250},
-    {'id': 3, 'id_barang': 'BRG-003', 'nama_barang': 'Celana Jeans Levis', 'tanggal': '2024-05-23', 'jumlah': 75},
-]
-
-# Admin Routes
+# --- Admin Routes (Dimodifikasi untuk Database) ---
 
 @app.route('/admin/home')
-def admin_home(): # Mengganti nama fungsi agar unik jika 'home' sudah ada
+def admin_home():
     return render_template('admin/index.html')
 
 @app.route('/admin/admin-kelola-barang')
 def kelolabarang():
-    # Halaman ini mungkin memerlukan logikanya sendiri atau data dari database
     return render_template('admin/barang.html')
 
 @app.route('/admin/admin-kelola-gudang')
 def kelolagudang():
     """
-    Fungsi ini menampilkan halaman utama gudang.
-    Mengambil data (saat ini dummy_items) dan mengirimkannya ke template.
+    [MODIFIED] Mengambil data dari database SQLite dan menampilkannya.
     """
-    items = dummy_items 
+    conn = get_db_connection()
+    items = conn.execute('SELECT * FROM gudang ORDER BY tanggal DESC').fetchall()
+    conn.close()
     return render_template('admin/gudang.html', items=items)
 
 @app.route('/admin/admin-laporan')
 def laporan():
-    """
-    Fungsi ini menampilkan halaman laporan.
-    Saat ini hanya mengembalikan template tanpa data.
-    """
     return render_template('admin/laporan.html')
 
 @app.route('/admin/gudang/add', methods=['POST'])
 def add_item():
     """
-    Endpoint ini menangani penambahan data barang baru ke gudang.
+    [MODIFIED] Menambahkan data barang baru ke database.
     """
     if request.method == 'POST':
-        id_barang = request.form.get('id_barang')
-        nama_barang = request.form.get('nama_barang')
-        tanggal = request.form.get('tanggal')
-        jumlah = request.form.get('jumlah')
+        id_barang = request.form['id_barang']
+        nama_barang = request.form['nama_barang']
+        tanggal = request.form['tanggal']
+        jumlah = request.form['jumlah']
 
-        # Untuk debugging, Anda bisa print data yang diterima
-        print(f"Adding new item: ID Barang={id_barang}, Nama={nama_barang}, Tanggal={tanggal}, Jumlah={jumlah}")
-
-        # DATABASE INTEGRATION: 
-        # Di sini Anda akan menambahkan logika untuk menyimpan data baru ke database.
-        # Contoh:
-        # new_item_id = len(dummy_items) + 1 # Hasilkan ID baru (sementara)
-        # dummy_items.append({'id': new_item_id, 'id_barang': id_barang, 'nama_barang': nama_barang, 'tanggal': tanggal, 'jumlah': int(jumlah)})
-        # print("Item added to dummy_items:", dummy_items[-1])
+        conn = get_db_connection()
+        conn.execute('INSERT INTO gudang (id_barang, nama_barang, tanggal, jumlah) VALUES (?, ?, ?, ?)',
+                     (id_barang, nama_barang, tanggal, int(jumlah)))
+        conn.commit()
+        conn.close()
         
-        # Setelah data disimpan, redirect kembali ke halaman kelola gudang
         return redirect(url_for('kelolagudang'))
-    # Jika bukan POST (meskipun route ini hanya untuk POST), redirect saja
     return redirect(url_for('kelolagudang'))
-
 
 @app.route('/admin/gudang/edit/<int:id>', methods=['POST'])
 def edit_item(id):
     """
-    Endpoint ini menangani pembaruan data barang yang sudah ada di gudang.
+    [MODIFIED] Memperbarui data barang di database berdasarkan ID.
     """
     if request.method == 'POST':
-        item_id_to_edit = id
-        id_barang_form = request.form.get('id_barang')
-        nama_barang_form = request.form.get('nama_barang')
-        tanggal_form = request.form.get('tanggal')
-        jumlah_form = request.form.get('jumlah')
+        id_barang_form = request.form['id_barang']
+        nama_barang_form = request.form['nama_barang']
+        tanggal_form = request.form['tanggal']
+        jumlah_form = request.form['jumlah']
         
-        print(f"Editing item ID {item_id_to_edit}: ID Barang={id_barang_form}, Nama={nama_barang_form}, Tanggal={tanggal_form}, Jumlah={jumlah_form}")
+        conn = get_db_connection()
+        conn.execute('UPDATE gudang SET id_barang = ?, nama_barang = ?, tanggal = ?, jumlah = ? WHERE id = ?',
+                     (id_barang_form, nama_barang_form, tanggal_form, int(jumlah_form), id))
+        conn.commit()
+        conn.close()
 
-        # DATABASE INTEGRATION:
-        # Di sini Anda akan menambahkan logika untuk memperbarui data di database berdasarkan 'item_id_to_edit'.
-        # Contoh dengan dummy_items:
-        # for item in dummy_items:
-        #     if item['id'] == item_id_to_edit:
-        #         item['id_barang'] = id_barang_form
-        #         item['nama_barang'] = nama_barang_form
-        #         item['tanggal'] = tanggal_form
-        #         item['jumlah'] = int(jumlah_form)
-        #         print("Item updated in dummy_items:", item)
-        #         break
-        
         return redirect(url_for('kelolagudang'))
     return redirect(url_for('kelolagudang'))
 
 @app.route('/admin/gudang/delete/<int:id>', methods=['POST'])
 def delete_item(id):
     """
-    Endpoint ini menangani penghapusan data barang dari gudang.
+    [MODIFIED] Menghapus data barang dari database berdasarkan ID.
     """
     if request.method == 'POST':
-        item_id_to_delete = id
-        print(f"Deleting item ID {item_id_to_delete}")
-
-        # DATABASE INTEGRATION:
-        # Di sini Anda akan menambahkan logika untuk menghapus data dari database berdasarkan 'item_id_to_delete'.
-        # Contoh dengan dummy_items:
-        # global dummy_items # Jika Anda memodifikasi list global
-        # dummy_items = [item for item in dummy_items if item['id'] != item_id_to_delete]
-        # print(f"Item with ID {item_id_to_delete} removed from dummy_items.")
+        conn = get_db_connection()
+        conn.execute('DELETE FROM gudang WHERE id = ?', (id,))
+        conn.commit()
+        conn.close()
         
         return redirect(url_for('kelolagudang'))
     return redirect(url_for('kelolagudang'))
 
-
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Pastikan database ada sebelum aplikasi dijalankan
+    if not os.path.exists(DATABASE):
+        print(f"Database tidak ditemukan di '{DATABASE}'. Jalankan 'init_db.py' terlebih dahulu.")
+    else:
+        app.run(debug=True)
