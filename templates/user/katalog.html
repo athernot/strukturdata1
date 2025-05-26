@@ -188,19 +188,35 @@
                 <div class="col-lg-3 col-md-6 mb-4 product-item-col featured">
                     <div class="card card-interactive">
                         <img src="{{ item.gambar if item.gambar else 'https://via.placeholder.com/400x400.png?text=No+Image' }}" class="card-img-top" alt="{{ item.nama_barang }}">
-                        <div class="card-body text-center">
-                            <h5 class="card-title">{{ item.nama_barang }}</h5>
-                            <button class="btn btn-interactive mt-3" data-bs-toggle="modal" data-bs-target="#productModal"
-                                    data-title="{{ item.nama_barang }}"
-                                    data-img="{{ item.gambar if item.gambar else 'https://via.placeholder.com/400x400.png?text=No+Image' }}"
-                                    data-text="{{ item.deskripsi if item.deskripsi else 'Deskripsi tidak tersedia.' }}"
-                                    data-id="{{ item.id_barang }}"
-                                    data-stock="{{ item.jumlah }}">
-                                Quick View
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                        <<div class="card-body text-center">
+    <h5 class="card-title">{{ item.nama_barang }}</h5>
+    <p class="card-text">
+        {% if item.harga %}
+            Rp {{ "{:,.0f}".format(item.harga) }}
+        {% else %}
+            <span class="text-muted">Harga tidak tersedia</span>
+        {% endif %}
+    </p>
+    <div class="d-flex justify-content-center align-items-center">
+        </div>
+</div>
+        <button class="btn btn-sm btn-outline-light" 
+                data-bs-toggle="modal" 
+                data-bs-target="#productModal"
+                data-title="{{ item.nama_barang }}"
+                data-img="{{ item.gambar if item.gambar else 'https://via.placeholder.com/400x400.png?text=No+Image' }}"
+                data-text="{{ item.deskripsi if item.deskripsi else 'Deskripsi tidak tersedia.' }}"
+                data-id="{{ item.id_barang }}"
+                data-stock="{{ item.jumlah }}">
+            Detail
+        </button>
+        <form action="{{ url_for('add_to_cart', item_id=item.id) }}" method="POST" class="ms-2">
+             <button type="submit" class="btn btn-interactive">
+                <i class="fas fa-cart-plus me-1"></i> Add to Cart
+            </button>
+        </form>
+    </div>
+</div>
                 {% endfor %}
             </div>
         </div>

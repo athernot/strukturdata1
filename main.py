@@ -2,9 +2,9 @@
 
 import os
 import sqlite3
+import uuid
 from functools import wraps
-# Menghapus jsonify karena tidak digunakan untuk render_template
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 
 # --- KONFIGURASI APLIKASI ---
@@ -96,13 +96,260 @@ def index():
 @app.route('/katalog')
 def katalog():
     conn = get_db_connection()
-    items = conn.execute('SELECT * FROM gudang ORDER BY tanggal DESC').fetchall()
+    items = conn.execute('SELECT * FROM gudang WHERE jumlah > 0 ORDER BY tanggal DESC').fetchall()
     conn.close()
     return render_template('user/katalog.html', items=items)
 
 @app.route('/kontak')
 def kontak():
     return render_template('user/kontak.html')
+
+# --- RUTE KERANJANG & CHECKOUT ---
+@app.route('/cart/add/<int:item_id>', methods=['POST'])
+@login_required
+def add_to_cart(item_id):
+    if 'cart' not in session:
+        session['cart'] = {}
+    
+    cart = session['cart']
+    item_id_str = str(item_id)
+    
+    # Ambil jumlah dari form, default 1
+    quantity = int(request.form.get('quantity', 1))
+
+    # Cek stok
+    conn = get_db_connection()
+    item = conn.execute('SELECT jumlah FROM gudang WHERE id = ?', (item_id,)).fetchone()
+    conn.close()
+
+    if not item:
+        flash('Barang tidak ditemukan.', 'danger')
+        return redirect(url_for('katalog'))
+        
+    current_quantity_in_cart = cart.get(item_id_str, 0)
+    
+    if (current_quantity_in_cart + quantity) > item['jumlah']:
+        flash(f"Stok tidak mencukupi. Hanya tersedia {item['jumlah']} unit.", 'warning')
+    else:
+        cart[item_id_str] = current_quantity_in_cart + quantity
+        flash(f"Barang berhasil ditambahkan ke keranjang!", 'success')
+
+    session['cart'] = cart
+    return redirect(request.referrer or url_for('katalog'))
+
+@app.route('/cart')
+@login_required
+def cart():
+    if 'cart' not in session or not session['cart']:
+        return render_template('user/checkout.html', items_in_cart=[], total_price=0)
+
+    cart = session['cart']
+    item_ids = list(cart.keys())
+    
+    conn = get_db_connection()
+    # Membuat placeholder untuk query IN
+    placeholders = ','.join(['?'] * len(item_ids))
+    query = f'SELECT * FROM gudang WHERE id IN ({placeholders})'
+    db_items = conn.execute(query, item_ids).fetchall()
+    conn.close()
+    
+    items_in_cart = []
+    total_price = 0
+    
+    for item in db_items:
+        item_id = str(item['id'])
+        quantity = cart[item_id]
+        
+        # --- PERBAIKAN DIMULAI DI SINI ---
+        # Cek apakah kolom 'harga' ada pada item. Jika tidak, anggap harganya 0.
+        item_price = item['harga'] if 'harga' in item.keys() else 0
+        
+        subtotal = item_price * quantity
+        # --- PERBAIKAN SELESAI ---
+
+        total_price += subtotal
+        
+        items_in_cart.append({
+            'id': item['id'],
+            'nama_barang': item['nama_barang'],
+            'gambar': item['gambar'],
+            'harga': item_price, # Gunakan harga yang sudah divalidasi
+            'quantity': quantity,
+            'subtotal': subtotal
+        })
+
+    return render_template('user/checkout.html', items_in_cart=items_in_cart, total_price=total_price)
+
+@app.route('/cart/update', methods=['POST'])
+@login_required
+def update_cart():
+    item_id = str(request.form.get('item_id'))
+    quantity = int(request.form.get('quantity'))
+    
+    if 'cart' in session and item_id in session['cart']:
+        if quantity > 0:
+            # Cek stok
+            conn = get_db_connection()
+            item = conn.execute('SELECT jumlah FROM gudang WHERE id = ?', (item_id,)).fetchone()
+            conn.close()
+
+            if quantity > item['jumlah']:
+                 flash(f"Stok tidak mencukupi. Hanya tersedia {item['jumlah']} unit.", 'warning')
+            else:
+                session['cart'][item_id] = quantity
+                flash('Jumlah barang diperbarui.', 'success')
+        else:
+            # Hapus item jika jumlah 0 atau kurang
+            session['cart'].pop(item_id, None)
+            flash('Barang dihapus dari keranjang.', 'info')
+        
+        session.modified = True
+    
+    return redirect(url_for('cart'))
+
+@app.route('/cart/remove/<int:item_id>', methods=['POST'])
+@login_required
+def remove_from_cart(item_id):
+    item_id_str = str(item_id)
+    if 'cart' in session and item_id_str in session['cart']:
+        session['cart'].pop(item_id_str, None)
+        session.modified = True
+        flash('Barang berhasil dihapus dari keranjang.', 'success')
+    return redirect(url_for('cart'))
+
+
+@app.route('/checkout', methods=['POST'])
+@login_required
+def checkout():
+    if 'cart' not in session or not session['cart']:
+        flash('Keranjang Anda kosong.', 'warning')
+        return redirect(url_for('cart'))
+
+    # Ambil data dari form
+    nama_penerima = request.form.get('nama_penerima')
+    alamat_pengiriman = request.form.get('alamat_pengiriman')
+    telepon = request.form.get('telepon')
+    metode_pembayaran = request.form.get('metode_pembayaran')
+
+    if not all([nama_penerima, alamat_pengiriman, telepon, metode_pembayaran]):
+        flash('Harap lengkapi semua informasi pengiriman dan pembayaran.', 'danger')
+        return redirect(url_for('cart'))
+
+    # Proses item di keranjang
+    cart = session['cart']
+    item_ids = list(cart.keys())
+    conn = get_db_connection()
+    
+    try:
+        placeholders = ','.join(['?'] * len(item_ids))
+        query = f'SELECT * FROM gudang WHERE id IN ({placeholders})'
+        db_items = conn.execute(query, item_ids).fetchall()
+        
+        # --- PERBAIKAN DIMULAI DI SINI ---
+        # Validasi: Cek jika ada barang di keranjang yang sudah tidak ada di database
+        if len(db_items) != len(item_ids):
+            flash('Beberapa barang di keranjang Anda sudah tidak tersedia dan telah kami hapus secara otomatis.', 'warning')
+            
+            # Dapatkan ID barang yang valid (masih ada di DB)
+            found_ids = {str(item['id']) for item in db_items}
+            
+            # Buat ulang keranjang hanya dengan barang yang valid
+            new_cart = {key: value for key, value in cart.items() if key in found_ids}
+            session['cart'] = new_cart
+            session.modified = True
+            
+            # Alihkan kembali ke halaman keranjang agar pengguna bisa melihat perubahannya
+            return redirect(url_for('cart'))
+        # --- PERBAIKAN SELESAI ---
+
+        total_price = 0
+        items_to_order = []
+
+        for item in db_items:
+            item_id = str(item['id'])
+            quantity = cart[item_id]
+            
+            # Validasi stok
+            if quantity > item['jumlah']:
+                raise ValueError(f"Stok untuk {item['nama_barang']} tidak mencukupi.")
+            
+            subtotal = item['harga'] * quantity
+            total_price += subtotal
+            items_to_order.append({
+                'gudang_id': item['id'],
+                'nama_barang': item['nama_barang'],
+                'jumlah': quantity,
+                'harga_satuan': item['harga']
+            })
+
+        # Buat pesanan
+        nomor_pesanan = f'INV-{uuid.uuid4().hex[:8].upper()}'
+        
+        # Insert ke tabel 'pesanan'
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO pesanan (nomor_pesanan, user_id, nama_penerima, alamat_pengiriman, telepon, total_harga, metode_pembayaran, status_pembayaran)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (nomor_pesanan, session['user_id'], nama_penerima, alamat_pengiriman, telepon, total_price, metode_pembayaran, 'Lunas'))
+        
+        pesanan_id = cursor.lastrowid
+        
+        # Insert ke 'detail_pesanan' dan update stok 'gudang'
+        for order_item in items_to_order:
+            cursor.execute('''
+                INSERT INTO detail_pesanan (pesanan_id, gudang_id, nama_barang, jumlah, harga_satuan)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (pesanan_id, order_item['gudang_id'], order_item['nama_barang'], order_item['jumlah'], order_item['harga_satuan']))
+            
+            # Kurangi stok
+            cursor.execute(
+                'UPDATE gudang SET jumlah = jumlah - ? WHERE id = ?',
+                (order_item['jumlah'], order_item['gudang_id'])
+            )
+
+        conn.commit()
+        
+        # Simpan nomor pesanan untuk halaman konfirmasi
+        session['last_order_id'] = pesanan_id
+        
+        # Kosongkan keranjang
+        session.pop('cart', None)
+        
+        flash('Pesanan berhasil dibuat!', 'success')
+        return redirect(url_for('order_confirmation'))
+
+    except ValueError as e:
+        flash(str(e), 'danger')
+        conn.rollback()
+        return redirect(url_for('cart'))
+    except Exception as e:
+        flash(f'Terjadi kesalahan saat memproses pesanan: {e}', 'danger')
+        conn.rollback()
+        return redirect(url_for('cart'))
+    finally:
+        conn.close()
+
+@app.route('/order-confirmation')
+@login_required
+def order_confirmation():
+    last_order_id = session.get('last_order_id')
+    if not last_order_id:
+        return redirect(url_for('index'))
+
+    conn = get_db_connection()
+    pesanan = conn.execute('SELECT *, strftime("%d-%m-%Y %H:%M", tanggal_pesan) as tgl_formatted FROM pesanan WHERE id = ?', (last_order_id,)).fetchone()
+    detail_pesanan = conn.execute('SELECT * FROM detail_pesanan WHERE pesanan_id = ?', (last_order_id,)).fetchall()
+    conn.close()
+    
+    if not pesanan or pesanan['user_id'] != session['user_id']:
+        flash('Pesanan tidak ditemukan.', 'danger')
+        return redirect(url_for('index'))
+
+    # Hapus dari session setelah ditampilkan
+    session.pop('last_order_id', None)
+
+    return render_template('user/order_confirmation.html', pesanan=pesanan, detail_pesanan=detail_pesanan)
+
 
 # --- RUTE HALAMAN ADMIN ---
 @app.route('/admin/home')
@@ -118,8 +365,8 @@ def admin_home():
     unique_items_query = conn.execute('SELECT COUNT(id) FROM gudang').fetchone()
     unique_items = unique_items_query[0] if unique_items_query[0] is not None else 0
     
-    # Menghitung Stok Kritis (contoh: stok < 20)
-    KRITIS_THRESHOLD = 20
+    # Menghitung Stok Kritis (contoh: stok < 50)
+    KRITIS_THRESHOLD = 50
     stok_kritis_query = conn.execute('SELECT COUNT(id) FROM gudang WHERE jumlah < ?', (KRITIS_THRESHOLD,)).fetchone()
     stok_kritis = stok_kritis_query[0] if stok_kritis_query[0] is not None else 0
 
@@ -127,14 +374,15 @@ def admin_home():
     barang_keluar_total_query = conn.execute("SELECT SUM(jumlah) FROM transaksi WHERE tipe = 'keluar' AND tanggal >= date('now', '-30 days')").fetchone()
     total_barang_keluar = barang_keluar_total_query[0] if barang_keluar_total_query[0] is not None else 0
 
-    # Data untuk Grafik Tren (7 hari terakhir)
+    # Data untuk Grafik Tren (7 hari terakhir) - PERBAIKAN DI SINI
     barang_masuk_trend = conn.execute("SELECT strftime('%Y-%m-%d', tanggal) as tgl, SUM(jumlah) as total FROM transaksi WHERE tipe = 'masuk' AND tanggal >= date('now', '-7 days') GROUP BY tgl ORDER BY tgl ASC").fetchall()
     barang_keluar_trend = conn.execute("SELECT strftime('%Y-%m-%d', tanggal) as tgl, SUM(jumlah) as total FROM transaksi WHERE tipe = 'keluar' AND tanggal >= date('now', '-7 days') GROUP BY tgl ORDER BY tgl ASC").fetchall()
     conn.close()
 
-    # Memproses data untuk grafik ApexCharts
+    # Memproses data untuk grafik ApexCharts - PERBAIKAN DI SINI
     dates = sorted(list(set([row['tgl'] for row in barang_masuk_trend] + [row['tgl'] for row in barang_keluar_trend])))
     masuk_data_map = {row['tgl']: row['total'] for row in barang_masuk_trend}
+    # Baris ini yang diperbaiki: menggunakan 'barang_keluar_trend'
     keluar_data_map = {row['tgl']: row['total'] for row in barang_keluar_trend}
     
     chart_data_masuk = [masuk_data_map.get(date, 0) for date in dates]
@@ -172,8 +420,8 @@ def add_item():
     cursor = conn.cursor()
     try:
         # Masukkan ke tabel gudang
-        cursor.execute('INSERT INTO gudang (id_barang, nama_barang, tanggal, jumlah, deskripsi, gambar) VALUES (?, ?, ?, ?, ?, ?)',
-                     (request.form['id_barang'], request.form['nama_barang'], request.form['tanggal'], int(request.form['jumlah']), request.form.get('deskripsi', ''), request.form.get('gambar', '')))
+        cursor.execute('INSERT INTO gudang (id_barang, nama_barang, tanggal, jumlah, deskripsi, gambar, harga) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                     (request.form['id_barang'], request.form['nama_barang'], request.form['tanggal'], int(request.form['jumlah']), request.form.get('deskripsi', ''), request.form.get('gambar', ''), int(request.form['harga'])))
         
         new_item_id = cursor.lastrowid
         
@@ -186,7 +434,7 @@ def add_item():
     except sqlite3.IntegrityError:
         flash(f"ID Barang '{request.form['id_barang']}' sudah ada. Gunakan ID lain.", 'danger')
     except (ValueError, TypeError):
-        flash('Jumlah harus berupa angka.', 'danger')
+        flash('Jumlah dan Harga harus berupa angka.', 'danger')
     finally:
         conn.close()
     return redirect(url_for('kelola_gudang'))
@@ -233,15 +481,16 @@ def edit_item(id):
     jumlah_form = request.form['jumlah']
     deskripsi_form = request.form.get('deskripsi', '')
     gambar_form = request.form.get('gambar', '')
+    harga_form = request.form.get('harga', 0)
 
     conn = get_db_connection()
     try:
-        conn.execute('UPDATE gudang SET nama_barang = ?, tanggal = ?, jumlah = ?, deskripsi = ?, gambar = ? WHERE id = ?',
-                     (nama_barang_form, tanggal_form, int(jumlah_form), deskripsi_form, gambar_form, id))
+        conn.execute('UPDATE gudang SET nama_barang = ?, tanggal = ?, jumlah = ?, deskripsi = ?, gambar = ?, harga = ? WHERE id = ?',
+                     (nama_barang_form, tanggal_form, int(jumlah_form), deskripsi_form, gambar_form, int(harga_form), id))
         conn.commit()
         flash('Data barang berhasil diperbarui!', 'info')
     except (ValueError, TypeError):
-        flash('Jumlah harus berupa angka.', 'danger')
+        flash('Jumlah dan Harga harus berupa angka.', 'danger')
     finally:
         conn.close()
     return redirect(url_for('kelola_gudang'))
@@ -298,6 +547,7 @@ def delete_laporan(id):
     conn.close()
     flash('Laporan telah dihapus.', 'success')
     return redirect(url_for('preview_laporan'))
+
 
 # --- MAIN EXECUTION ---
 if __name__ == '__main__':

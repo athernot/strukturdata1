@@ -308,22 +308,30 @@
 
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav navbar-nav-enhanced me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">
-                            <i class="fas fa-home nav-icon"></i>Home
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/katalog">
-                            <i class="fas fa-book-open nav-icon"></i>Katalog
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/kontak">
-                            <i class="fas fa-envelope nav-icon"></i>Kontak
-                        </a>
-                    </li>
-                </ul>
+    <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('index') }}">
+            <i class="fas fa-home nav-icon"></i>Home
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('katalog') }}">
+            <i class="fas fa-book-open nav-icon"></i>Katalog
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('cart') }}">
+            <i class="fas fa-shopping-cart nav-icon"></i>Keranjang
+            {% if 'cart' in session and session['cart'] %}
+            <span class="badge rounded-pill bg-danger ms-1">{{ session['cart']|length }}</span>
+            {% endif %}
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('kontak') }}">
+            <i class="fas fa-envelope nav-icon"></i>Kontak
+        </a>
+    </li>
+</ul>
 
                 <ul class="navbar-nav ms-auto d-flex flex-row align-items-center">
                     {% if 'user_id' in session %}

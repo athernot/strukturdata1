@@ -17,7 +17,6 @@ def initialize_database():
     cursor = connection.cursor()
 
     print("1. Membuat tabel 'gudang' jika belum ada...")
-    # Menambahkan kolom deskripsi dan gambar untuk halaman user
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS gudang (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,7 +25,8 @@ def initialize_database():
             deskripsi TEXT,
             gambar TEXT,
             tanggal DATE NOT NULL,
-            jumlah INTEGER NOT NULL
+            jumlah INTEGER NOT NULL,
+            harga INTEGER NOT NULL DEFAULT 150000
         )
     ''')
 
@@ -64,16 +64,60 @@ def initialize_database():
         )
     ''')
 
+    print("NEW: Membuat tabel 'pesanan' untuk checkout...")
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS pesanan (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nomor_pesanan TEXT NOT NULL UNIQUE,
+            user_id INTEGER NOT NULL,
+            nama_penerima TEXT NOT NULL,
+            alamat_pengiriman TEXT NOT NULL,
+            telepon TEXT NOT NULL,
+            total_harga INTEGER NOT NULL,
+            metode_pembayaran TEXT NOT NULL,
+            status_pembayaran TEXT NOT NULL DEFAULT 'Belum Dibayar',
+            tanggal_pesan TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
+
+    print("NEW: Membuat tabel 'detail_pesanan' untuk item dalam pesanan...")
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS detail_pesanan (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            pesanan_id INTEGER NOT NULL,
+            gudang_id INTEGER NOT NULL,
+            nama_barang TEXT NOT NULL,
+            jumlah INTEGER NOT NULL,
+            harga_satuan INTEGER NOT NULL,
+            FOREIGN KEY (pesanan_id) REFERENCES pesanan (id),
+            FOREIGN KEY (gudang_id) REFERENCES gudang (id)
+        )
+    ''')
+
     print("4. Menambahkan data awal ke tabel 'gudang'...")
     initial_items = [
-        ('BRG-001', 'Sepatu Lari Adidas', 'Sepatu lari yang ringan dan nyaman untuk performa maksimal.', 'https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', '2024-05-20', 100),
-        ('BRG-002', 'Kaos Polos Katun', 'Kaos katun premium yang lembut dan sejuk dipakai sehari-hari.', 'https://images.pexels.com/photos/428338/pexels-photo-428338.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', '2024-05-22', 250),
-        ('BRG-003', 'Celana Jeans Levis', 'Celana jeans klasik dengan potongan modern dan bahan yang tahan lama.', 'https://images.pexels.com/photos/1598507/pexels-photo-1598507.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', '2024-05-23', 75),
-        ('BRG-004', 'Jam Tangan Casio', 'Jam tangan digital klasik yang fungsional dan bergaya retro.', 'https://images.pexels.com/photos/190819/pexels-photo-190819.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', '2024-05-24', 50),
-        ('BRG-005', 'Tas Ransel Eiger', 'Tas ransel kuat dan serbaguna untuk kegiatan outdoor maupun sehari-hari.', 'https://images.pexels.com/photos/1545403/pexels-photo-1545403.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', '2024-05-25', 120),
-        ('BRG-006', 'Kemeja Flanel', 'Kemeja flanel hangat dengan motif kotak-kotak yang timeless.', 'https://images.pexels.com/photos/3755706/pexels-photo-3755706.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', '2024-05-26', 90)
+        ('BRG-001', 'Sepatu Lari Adidas', 'Sepatu lari yang ringan dan nyaman untuk performa maksimal.', 'https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', '2024-05-20', 100, 750000),
+        ('BRG-002', 'Kaos Polos Katun', 'Kaos katun premium yang lembut dan sejuk dipakai sehari-hari.', 'https://images.pexels.com/photos/428338/pexels-photo-428338.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', '2024-05-22', 250, 150000),
+        ('BRG-003', 'Celana Jeans Levis', 'Celana jeans klasik dengan potongan modern dan bahan yang tahan lama.', 'https://images.pexels.com/photos/1598507/pexels-photo-1598507.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', '2024-05-23', 75, 550000),
+        ('BRG-004', 'Jam Tangan Casio', 'Jam tangan digital klasik yang fungsional dan bergaya retro.', 'https://images.pexels.com/photos/190819/pexels-photo-190819.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', '2024-05-24', 50, 450000),
+        ('BRG-005', 'Tas Ransel Eiger', 'Tas ransel kuat dan serbaguna untuk kegiatan outdoor maupun sehari-hari.', 'https://images.pexels.com/photos/1545403/pexels-photo-1545403.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', '2024-05-25', 120, 400000),
+        ('BRG-006', 'Kemeja Flanel', 'Kemeja flanel hangat dengan motif kotak-kotak yang timeless.', 'https://images.pexels.com/photos/3755706/pexels-photo-3755706.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', '2024-05-26', 90, 250000)
     ]
-    cursor.executemany("INSERT OR IGNORE INTO gudang (id_barang, nama_barang, deskripsi, gambar, tanggal, jumlah) VALUES (?, ?, ?, ?, ?, ?)", initial_items)
+
+    # Cek dan tambahkan kolom 'harga' jika belum ada
+    try:
+        cursor.execute("SELECT harga FROM gudang LIMIT 1")
+    except sqlite3.OperationalError:
+        print("   - Menambahkan kolom 'harga' ke tabel 'gudang'...")
+        cursor.execute("ALTER TABLE gudang ADD COLUMN harga INTEGER NOT NULL DEFAULT 150000")
+
+    # Update data yang ada untuk memastikan harga tidak NULL
+    cursor.execute("UPDATE gudang SET harga = 150000 WHERE harga IS NULL")
+
+    for item in initial_items:
+        cursor.execute("INSERT OR IGNORE INTO gudang (id_barang, nama_barang, deskripsi, gambar, tanggal, jumlah, harga) VALUES (?, ?, ?, ?, ?, ?, ?)", item)
+
 
     print("5. Menambahkan user admin default...")
     try:

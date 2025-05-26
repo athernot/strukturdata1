@@ -1,0 +1,109 @@
+{% extends 'user/layout.html' %}
+{% block isi %}
+<style>
+    .section-bg { background: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%); min-height: 100vh; padding: 4rem 0; color: #fff; }
+    .cart-item-row { background: rgba(255,255,255,0.05); border-radius: 10px; margin-bottom: 1rem; padding: 1rem; }
+    .cart-item-img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; }
+    .form-control-dark, .form-select-dark { background-color: rgba(0,0,0,0.2); border: 1px solid #444; color: #fff; }
+    .form-control-dark:focus, .form-select-dark:focus { background-color: rgba(0,0,0,0.3); border-color: #3498db; box-shadow: none; color: #fff; }
+    .summary-card { background: rgba(255,255,255,0.08); border-radius: 15px; padding: 2rem; border: 1px solid rgba(255,255,255,0.1); }
+</style>
+
+<div class="section-bg">
+    <div class="container">
+        <h1 class="text-center fw-bold mb-5">Keranjang & Checkout</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if items_in_cart %}
+        <form action="{{ url_for('checkout') }}" method="POST">
+            <div class="row g-5">
+                <div class="col-lg-7">
+                    <h3 class="mb-4">Item di Keranjang</h3>
+                    {% for item in items_in_cart %}
+                    <div class="d-flex align-items-center cart-item-row">
+                        <img src="{{ item.gambar }}" alt="{{ item.nama_barang }}" class="cart-item-img">
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="mb-1">{{ item.nama_barang }}</h5>
+                            <p class="mb-1 text-muted">Rp {{ "{:,.0f}".format(item.harga or 0) }}</p>
+                            <p class="fw-bold">Rp {{ "{:,.0f}".format(item.subtotal or 0) }}</p>
+                            <span class="fw-bold">Rp {{ "{:,.0f}".format(total_price or 0) }}</span>
+                            <form action="{{ url_for('update_cart') }}" method="POST" class="d-inline-flex align-items-center">
+                                <input type="hidden" name="item_id" value="{{ item.id }}">
+                                <input type="number" name="quantity" value="{{ item.quantity }}" class="form-control-dark" style="width: 70px;" min="1">
+                                <button type="submit" class="btn btn-sm btn-outline-info ms-2">Update</button>
+                            </form>
+                        </div>
+                        <div class="text-end">
+                            <h6 class="mb-2">Subtotal</h6>
+                            <p class="fw-bold">Rp {{ "{:,.0f}".format(item.subtotal) }}</p>
+                             <form action="{{ url_for('remove_from_cart', item_id=item.id) }}" method="POST">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="summary-card">
+                        <h3 class="mb-4">Ringkasan & Pembayaran</h3>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Nama Penerima</label>
+                            <input type="text" name="nama_penerima" class="form-control form-control-dark" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Alamat Pengiriman</label>
+                            <textarea name="alamat_pengiriman" class="form-control form-control-dark" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nomor Telepon</label>
+                            <input type="tel" name="telepon" class="form-control form-control-dark" required>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="mb-4">
+                            <label class="form-label">Metode Pembayaran</label>
+                            <select name="metode_pembayaran" class="form-select form-select-dark" required>
+                                <option value="" disabled selected>Pilih Pembayaran</option>
+                                <option value="Transfer Bank">Transfer Bank (BCA)</option>
+                                <option value="Virtual Account">Virtual Account (Mandiri)</option>
+                                <option value="GoPay">GoPay</option>
+                                <option value="OVO">OVO</option>
+                            </select>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between fs-5 mb-4">
+                            <span>Total Harga:</span>
+                            <span class="fw-bold">Rp {{ "{:,.0f}".format(total_price) }}</span>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100 btn-lg">
+                            <i class="fas fa-shield-alt me-2"></i> Buat Pesanan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+            <h3 class="text-muted">Keranjang Anda Kosong</h3>
+            <p>Sepertinya Anda belum menambahkan barang apapun.</p>
+            <a href="{{ url_for('katalog') }}" class="btn btn-primary mt-3">Mulai Belanja</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
